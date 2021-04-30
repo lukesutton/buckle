@@ -1,7 +1,6 @@
-use crossterm::style::ContentStyle;
-
 use crate::buffer::Buffer;
 use crate::constraints::solve_auto;
+use crate::styles::Style;
 use crate::values::*;
 
 /// Any element which is rendered to screen.
@@ -29,8 +28,8 @@ impl Auto {
 
     pub fn add<V: 'static + View>(
         mut self,
-        width: AutoItemConstraint,
-        height: AutoItemConstraint,
+        width: ContainerSizing,
+        height: ContainerSizing,
         item: V,
     ) -> Self {
         self.items.push(AutoItem {
@@ -41,16 +40,16 @@ impl Auto {
         self
     }
 
-    pub fn rule(mut self, style: Option<ContentStyle>) -> Self {
+    pub fn rule(mut self, style: Option<Style>) -> Self {
         match self.orientation {
             Orientation::Horizontal => self.items.push(AutoItem {
-                width: AutoItemConstraint::Fixed(1),
-                height: AutoItemConstraint::Fill,
+                width: ContainerSizing::Fixed(1),
+                height: ContainerSizing::Fill,
                 item: Box::new(VRule::new(style)),
             }),
             Orientation::Vertical => self.items.push(AutoItem {
-                width: AutoItemConstraint::Fill,
-                height: AutoItemConstraint::Fixed(1),
+                width: ContainerSizing::Fill,
+                height: ContainerSizing::Fixed(1),
                 item: Box::new(HRule::new(style)),
             }),
         }
@@ -60,8 +59,8 @@ impl Auto {
 
     pub fn spacer(mut self) -> Self {
         self.items.push(AutoItem {
-            width: AutoItemConstraint::Fill,
-            height: AutoItemConstraint::Fill,
+            width: ContainerSizing::Fill,
+            height: ContainerSizing::Fill,
             item: Box::new(Spacer),
         });
         self
@@ -111,15 +110,15 @@ impl View for Auto {
     }
 }
 
-pub enum AutoItemConstraint {
+pub enum ContainerSizing {
     Hug,
     Fill,
     Fixed(usize),
 }
 
 pub struct AutoItem {
-    width: AutoItemConstraint,
-    height: AutoItemConstraint,
+    width: ContainerSizing,
+    height: ContainerSizing,
     item: Box<dyn View>,
 }
 
@@ -128,15 +127,15 @@ impl AutoItem {
         let item_size = self.item.sizing(&bounds);
 
         let vertical = match self.height {
-            AutoItemConstraint::Hug => Constraint::Fixed(item_size.height),
-            AutoItemConstraint::Fill => Constraint::Fill,
-            AutoItemConstraint::Fixed(size) => Constraint::Fixed(size),
+            ContainerSizing::Hug => Constraint::Fixed(item_size.height),
+            ContainerSizing::Fill => Constraint::Fill,
+            ContainerSizing::Fixed(size) => Constraint::Fixed(size),
         };
 
         let horizontal = match self.width {
-            AutoItemConstraint::Hug => Constraint::Fixed(item_size.width),
-            AutoItemConstraint::Fill => Constraint::Fill,
-            AutoItemConstraint::Fixed(size) => Constraint::Fixed(size),
+            ContainerSizing::Hug => Constraint::Fixed(item_size.width),
+            ContainerSizing::Fill => Constraint::Fill,
+            ContainerSizing::Fixed(size) => Constraint::Fixed(size),
         };
 
         Constraints {
@@ -166,11 +165,11 @@ impl View for Spacer {
 // Styled text.
 pub struct Text {
     pub value: String,
-    pub style: Option<ContentStyle>,
+    pub style: Option<Style>,
 }
 
 impl Text {
-    pub fn new(value: String, style: Option<ContentStyle>) -> Self {
+    pub fn new(value: String, style: Option<Style>) -> Self {
         Self { value, style }
     }
 }
@@ -200,11 +199,11 @@ impl View for Text {
 
 pub struct MultilineText {
     pub value: String,
-    pub style: Option<ContentStyle>,
+    pub style: Option<Style>,
 }
 
 impl MultilineText {
-    pub fn new(value: String, style: Option<ContentStyle>) -> Self {
+    pub fn new(value: String, style: Option<Style>) -> Self {
         Self { value, style }
     }
 }
@@ -230,11 +229,11 @@ impl View for MultilineText {
 
 // A vertical line that occupies the full height of it's container.
 pub struct VRule {
-    pub style: Option<ContentStyle>,
+    pub style: Option<Style>,
 }
 
 impl VRule {
-    pub fn new(style: Option<ContentStyle>) -> Self {
+    pub fn new(style: Option<Style>) -> Self {
         Self { style }
     }
 }
@@ -253,11 +252,11 @@ impl View for VRule {
 }
 
 pub struct HRule {
-    pub style: Option<ContentStyle>,
+    pub style: Option<Style>,
 }
 
 impl HRule {
-    pub fn new(style: Option<ContentStyle>) -> Self {
+    pub fn new(style: Option<Style>) -> Self {
         Self { style }
     }
 }

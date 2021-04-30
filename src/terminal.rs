@@ -1,10 +1,10 @@
-use std::io::{stdout, Stdout, Write};
-use crossterm::{cursor, execute, queue, terminal, style};
 use crate::buffer::{Buffer, DiffResult};
+use crossterm::{cursor, execute, queue, style, terminal};
+use std::io::{stdout, Stdout, Write};
 
 pub struct Terminal {
     stdout: Stdout,
-    buffer: Buffer
+    buffer: Buffer,
 }
 
 impl Terminal {
@@ -15,8 +15,8 @@ impl Terminal {
         let buffer = Buffer::new(cols as usize, rows as usize);
 
         Terminal {
-            stdout: out, 
-            buffer: buffer
+            stdout: out,
+            buffer: buffer,
         }
     }
 
@@ -25,8 +25,7 @@ impl Terminal {
         if cols != self.buffer.width as u16 || rows != self.buffer.height as u16 {
             self.buffer = Buffer::new(cols as usize, rows as usize);
             true
-        }
-        else {
+        } else {
             false
         }
     }
@@ -48,25 +47,23 @@ impl Terminal {
             DiffResult::Changed(changes) => {
                 for (point, cell) in changes {
                     let content = if let Some(style) = cell.style {
-                        style::StyledContent::new(style, cell.content)
-                    }
-                    else {
+                        style::StyledContent::new(style.style, cell.content)
+                    } else {
                         style::style(cell.content)
                     };
 
                     queue!(
-                        self.stdout, 
+                        self.stdout,
                         cursor::MoveTo(point.x as u16, point.y as u16),
                         style::PrintStyledContent(content)
-                    ).unwrap();
+                    )
+                    .unwrap();
                 }
                 self.stdout.flush().unwrap();
                 self.buffer = updates;
             }
-        }        
+        }
     }
 }
 
-pub enum TerminalEvent {
-
-}
+pub enum TerminalEvent {}

@@ -16,13 +16,13 @@ fn main() {
         Arrangement::packed(Alignment::Beginning, Alignment::Beginning),
     )
     .add(
-        AutoItemConstraint::Fixed(3),
-        AutoItemConstraint::Fixed(3),
+        ContainerSizing::Fixed(3),
+        ContainerSizing::Fixed(3),
         MultilineText::new(ONE.to_string(), None),
     )
     .add(
-        AutoItemConstraint::Fixed(3),
-        AutoItemConstraint::Fixed(3),
+        ContainerSizing::Fixed(3),
+        ContainerSizing::Fixed(3),
         MultilineText::new(TWO.to_string(), None),
     );
 

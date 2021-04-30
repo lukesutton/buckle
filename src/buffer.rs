@@ -1,10 +1,11 @@
+use crate::styles::Style;
 use crate::values::{Point, Rect};
 pub use crossterm::style::{Attribute, Color, ContentStyle};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cell {
     pub content: char,
-    pub style: Option<ContentStyle>,
+    pub style: Option<Style>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -92,20 +93,20 @@ impl Buffer {
     }
 
     // Draws a character at the specified point, with the optional styling.
-    pub fn draw_cell(&mut self, at: Point, char: char, style: Option<ContentStyle>) {
+    pub fn draw_cell(&mut self, at: Point, char: char, style: Option<Style>) {
         let cell = self.mut_cell(at.x, at.y);
         cell.content = char;
         cell.style = style;
     }
 
-    pub fn draw_text(&mut self, at: &Point, text: &str, style: &Option<ContentStyle>) {
+    pub fn draw_text(&mut self, at: &Point, text: &str, style: &Option<Style>) {
         let pairs = (at.x..(text.len() + at.x)).zip(text.chars());
         for (x, c) in pairs {
             self.draw_cell(Point { x, y: at.y }, c, style.clone())
         }
     }
 
-    pub fn draw_multiline_text(&mut self, within: &Rect, text: &str, style: &Option<ContentStyle>) {
+    pub fn draw_multiline_text(&mut self, within: &Rect, text: &str, style: &Option<Style>) {
         for (line_number, line) in text.lines().enumerate() {
             if line_number < within.dimensions.height {
                 for (entry_number, entry) in line.chars().enumerate() {
@@ -124,7 +125,7 @@ impl Buffer {
         }
     }
 
-    pub fn draw_h_rule(&mut self, at: &Point, length: usize, style: &Option<ContentStyle>) {
+    pub fn draw_h_rule(&mut self, at: &Point, length: usize, style: &Option<Style>) {
         for x in at.x..(at.x + length) {
             self.draw_cell(Point { x, y: at.y }, H_LINE, style.clone())
         }
@@ -138,13 +139,13 @@ impl Buffer {
         }
     }
 
-    pub fn draw_v_rule(&mut self, at: &Point, length: usize, style: &Option<ContentStyle>) {
+    pub fn draw_v_rule(&mut self, at: &Point, length: usize, style: &Option<Style>) {
         for y in at.y..(at.y + length) {
             self.draw_cell(Point { x: at.x, y }, V_LINE, style.clone())
         }
     }
 
-    pub fn draw_box(&mut self, rect: Rect, rounded: bool, style: Option<ContentStyle>) {
+    pub fn draw_box(&mut self, rect: Rect, rounded: bool, style: Option<Style>) {
         let last = rect.origin.x + rect.dimensions.width;
         let last_inset = last - 1;
         let bottom_y = rect.origin.y + rect.dimensions.height;

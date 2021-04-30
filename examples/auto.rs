@@ -13,19 +13,19 @@ widget, which is to truncate the text, not wrap it.";
         Arrangement::fixed(Alignment::Beginning, Alignment::Beginning, 1),
     )
     .add(
-        AutoItemConstraint::Fixed(80),
-        AutoItemConstraint::Fill,
+        ContainerSizing::Fixed(80),
+        ContainerSizing::Fill,
         MultilineText::new(paragraph.to_string(), None),
     )
     .rule(None)
     .add(
-        AutoItemConstraint::Fill,
-        AutoItemConstraint::Fill,
+        ContainerSizing::Fill,
+        ContainerSizing::Fill,
         Text::new(
             "Fill".to_string(),
             Some(
-                ContentStyle::new()
-                    .attribute(Attribute::Bold)
+                Style::new()
+                    .bold()
                     .foreground(Color::Black)
                     .background(Color::Green),
             ),
@@ -33,27 +33,23 @@ widget, which is to truncate the text, not wrap it.";
     )
     .rule(None)
     .add(
-        AutoItemConstraint::Hug,
-        AutoItemConstraint::Fill,
+        ContainerSizing::Hug,
+        ContainerSizing::Fill,
         Text::new("Hug".to_string(), None),
     )
     .rule(None)
     .add(
-        AutoItemConstraint::Fixed(20),
-        AutoItemConstraint::Fill,
+        ContainerSizing::Fixed(20),
+        ContainerSizing::Fill,
         Text::new("Fixed".to_string(), None),
     );
 
     let v_layout = Auto::new(Orientation::Vertical, Arrangement::default())
-        .add(
-            AutoItemConstraint::Fill,
-            AutoItemConstraint::Fixed(20),
-            h_layout,
-        )
+        .add(ContainerSizing::Fill, ContainerSizing::Fixed(20), h_layout)
         .rule(None)
         .add(
-            AutoItemConstraint::Fill,
-            AutoItemConstraint::Fill,
+            ContainerSizing::Fill,
+            ContainerSizing::Fill,
             Text::new("Ho there".to_string(), None),
         );
 

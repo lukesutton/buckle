@@ -9,8 +9,8 @@ widget, which is to truncate the text, not wrap it.";
     let mut terminal = Terminal::new();
 
     let h_layout = Auto::new(
-        Orientation::Horizontal,
-        Arrangement::fixed(Alignment::Beginning, Alignment::Beginning, 1),
+        Dir::Horizontal,
+        Layout::fixed(Align::Start, Align::Start, 1),
     )
     .add(
         ContainerSizing::Fixed(80),
@@ -44,7 +44,7 @@ widget, which is to truncate the text, not wrap it.";
         Text::new("Fixed".to_string(), None),
     );
 
-    let v_layout = Auto::new(Orientation::Vertical, Arrangement::default())
+    let v_layout = Auto::new(Dir::Vertical, Layout::default())
         .add(ContainerSizing::Fill, ContainerSizing::Fixed(20), h_layout)
         .rule(None)
         .add(

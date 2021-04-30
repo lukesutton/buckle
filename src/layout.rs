@@ -1,5 +1,5 @@
 use crate::buffer::Buffer;
-use crate::constraints::solve_auto;
+use crate::solver::solve_auto;
 use crate::styles::Style;
 use crate::values::*;
 
@@ -12,15 +12,15 @@ pub trait View {
 /// A layout which positions it's children automatically based on their size
 /// and the constraints provided.
 pub struct Auto {
-    orientation: Orientation,
-    arrangement: Arrangement,
+    dir: Dir,
+    arrangement: Layout,
     items: Vec<AutoItem>,
 }
 
 impl Auto {
-    pub fn new(orientation: Orientation, arrangement: Arrangement) -> Self {
+    pub fn new(dir: Dir, arrangement: Layout) -> Self {
         Auto {
-            orientation,
+            dir,
             arrangement,
             items: Vec::new(),
         }
@@ -41,13 +41,13 @@ impl Auto {
     }
 
     pub fn rule(mut self, style: Option<Style>) -> Self {
-        match self.orientation {
-            Orientation::Horizontal => self.items.push(AutoItem {
+        match self.dir {
+            Dir::Horizontal => self.items.push(AutoItem {
                 width: ContainerSizing::Fixed(1),
                 height: ContainerSizing::Fill,
                 item: Box::new(VRule::new(style)),
             }),
-            Orientation::Vertical => self.items.push(AutoItem {
+            Dir::Vertical => self.items.push(AutoItem {
                 width: ContainerSizing::Fill,
                 height: ContainerSizing::Fixed(1),
                 item: Box::new(HRule::new(style)),
@@ -75,18 +75,18 @@ impl View for Auto {
         for item in &self.items {
             let constraints = item.constraints(&bounds);
 
-            let proposed_width = match constraints.horizontal {
-                Constraint::Fill => bounds.width,
-                Constraint::Fixed(size) => size,
+            let proposed_width = match constraints.h {
+                Sizing::Fill => bounds.width,
+                Sizing::Fixed(size) => size,
             };
 
             if proposed_width > width {
                 width = proposed_width
             }
 
-            let proposed_height = match constraints.vertical {
-                Constraint::Fill => bounds.height,
-                Constraint::Fixed(size) => size,
+            let proposed_height = match constraints.v {
+                Sizing::Fill => bounds.height,
+                Sizing::Fixed(size) => size,
             };
 
             if proposed_height > height {
@@ -103,17 +103,11 @@ impl View for Auto {
             .iter()
             .map(|i| i.constraints(&within.dimensions))
             .collect();
-        let layout = solve_auto(&items, &self.orientation, &self.arrangement, &within);
+        let layout = solve_auto(&items, &self.dir, &self.arrangement, &within);
         for (rect, item) in layout.iter().zip(&self.items) {
             item.render(&rect, buffer);
         }
     }
-}
-
-pub enum ContainerSizing {
-    Hug,
-    Fill,
-    Fixed(usize),
 }
 
 pub struct AutoItem {
@@ -127,20 +121,20 @@ impl AutoItem {
         let item_size = self.item.sizing(&bounds);
 
         let vertical = match self.height {
-            ContainerSizing::Hug => Constraint::Fixed(item_size.height),
-            ContainerSizing::Fill => Constraint::Fill,
-            ContainerSizing::Fixed(size) => Constraint::Fixed(size),
+            ContainerSizing::Hug => Sizing::Fixed(item_size.height),
+            ContainerSizing::Fill => Sizing::Fill,
+            ContainerSizing::Fixed(size) => Sizing::Fixed(size),
         };
 
         let horizontal = match self.width {
-            ContainerSizing::Hug => Constraint::Fixed(item_size.width),
-            ContainerSizing::Fill => Constraint::Fill,
-            ContainerSizing::Fixed(size) => Constraint::Fixed(size),
+            ContainerSizing::Hug => Sizing::Fixed(item_size.width),
+            ContainerSizing::Fill => Sizing::Fill,
+            ContainerSizing::Fixed(size) => Sizing::Fixed(size),
         };
 
         Constraints {
-            vertical,
-            horizontal,
+            v: vertical,
+            h: horizontal,
         }
     }
 

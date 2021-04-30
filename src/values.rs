@@ -71,105 +71,95 @@ impl Rect {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Constraint {
+pub enum Sizing {
+    Fill,
+    Fixed(usize),
+}
+
+pub enum ContainerSizing {
+    Hug,
     Fill,
     Fixed(usize),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Orientation {
+pub enum Dir {
     Horizontal,
     Vertical,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Alignment {
-    Beginning,
+pub enum Align {
+    Start,
     Center,
     End,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Arrangement {
-    Packed {
-        vertical: Alignment,
-        horizontal: Alignment,
-    },
-    FixedSpacing {
-        vertical: Alignment,
-        horizontal: Alignment,
-        spacing: usize,
-    },
-    EvenSpacing {
-        vertical: Alignment,
-        horizontal: Alignment,
-    },
+pub enum Layout {
+    Packed { v: Align, h: Align },
+    Spaced { v: Align, h: Align, spacing: usize },
+    Spread { v: Align, h: Align },
 }
 
-impl Default for Arrangement {
+impl Default for Layout {
     fn default() -> Self {
         Self::Packed {
-            vertical: Alignment::Beginning,
-            horizontal: Alignment::Beginning,
+            v: Align::Start,
+            h: Align::Start,
         }
     }
 }
 
-impl Arrangement {
-    pub fn packed(vertical: Alignment, horizontal: Alignment) -> Self {
+impl Layout {
+    pub fn packed(vertical: Align, horizontal: Align) -> Self {
         Self::Packed {
-            vertical,
-            horizontal,
+            v: vertical,
+            h: horizontal,
         }
     }
 
-    pub fn fixed(vertical: Alignment, horizontal: Alignment, spacing: usize) -> Self {
-        Self::FixedSpacing {
-            vertical,
-            horizontal,
+    pub fn fixed(vertical: Align, horizontal: Align, spacing: usize) -> Self {
+        Self::Spaced {
+            v: vertical,
+            h: horizontal,
             spacing,
         }
     }
 
-    pub fn even(vertical: Alignment, horizontal: Alignment) -> Self {
-        Self::EvenSpacing {
-            vertical,
-            horizontal,
+    pub fn even(vertical: Align, horizontal: Align) -> Self {
+        Self::Spread {
+            v: vertical,
+            h: horizontal,
         }
     }
 
-    pub fn vertical(&self) -> &Alignment {
+    pub fn vertical(&self) -> &Align {
         match self {
-            Arrangement::Packed {
-                vertical,
-                horizontal: _,
-            } => vertical,
-            Arrangement::FixedSpacing {
-                vertical,
-                horizontal: _,
+            Layout::Packed { v: vertical, h: _ } => vertical,
+            Layout::Spaced {
+                v: vertical,
+                h: _,
                 spacing: _,
             } => vertical,
-            Arrangement::EvenSpacing {
-                vertical,
-                horizontal: _,
-            } => vertical,
+            Layout::Spread { v: vertical, h: _ } => vertical,
         }
     }
 
-    pub fn horizontal(&self) -> &Alignment {
+    pub fn horizontal(&self) -> &Align {
         match self {
-            Arrangement::Packed {
-                vertical: _,
-                horizontal,
+            Layout::Packed {
+                v: _,
+                h: horizontal,
             } => horizontal,
-            Arrangement::FixedSpacing {
-                vertical: _,
-                horizontal,
+            Layout::Spaced {
+                v: _,
+                h: horizontal,
                 spacing: _,
             } => horizontal,
-            Arrangement::EvenSpacing {
-                vertical: _,
-                horizontal,
+            Layout::Spread {
+                v: _,
+                h: horizontal,
             } => horizontal,
         }
     }
@@ -177,28 +167,28 @@ impl Arrangement {
     pub fn rotate(&mut self) {
         *self = match self {
             Self::Packed {
-                vertical,
-                horizontal,
+                v: vertical,
+                h: horizontal,
             } => Self::Packed {
-                vertical: *horizontal,
-                horizontal: *vertical,
+                v: *horizontal,
+                h: *vertical,
             },
 
-            Self::FixedSpacing {
-                vertical,
-                horizontal,
+            Self::Spaced {
+                v: vertical,
+                h: horizontal,
                 spacing,
-            } => Self::FixedSpacing {
-                vertical: *horizontal,
-                horizontal: *vertical,
+            } => Self::Spaced {
+                v: *horizontal,
+                h: *vertical,
                 spacing: *spacing,
             },
-            Self::EvenSpacing {
-                vertical,
-                horizontal,
-            } => Self::EvenSpacing {
-                vertical: *horizontal,
-                horizontal: *vertical,
+            Self::Spread {
+                v: vertical,
+                h: horizontal,
+            } => Self::Spread {
+                v: *horizontal,
+                h: *vertical,
             },
         }
     }
@@ -206,22 +196,19 @@ impl Arrangement {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Constraints {
-    pub horizontal: Constraint,
-    pub vertical: Constraint,
+    pub h: Sizing,
+    pub v: Sizing,
 }
 
 impl Constraints {
     pub fn rotate(&mut self) {
-        let h = self.horizontal;
-        let v = self.vertical;
-        self.horizontal = v;
-        self.vertical = h;
+        let h = self.h;
+        let v = self.v;
+        self.h = v;
+        self.v = h;
     }
 
-    pub fn new(horizontal: Constraint, vertical: Constraint) -> Self {
-        Self {
-            horizontal,
-            vertical,
-        }
+    pub fn new(h: Sizing, v: Sizing) -> Self {
+        Self { h, v }
     }
 }

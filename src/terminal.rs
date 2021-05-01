@@ -1,4 +1,5 @@
 use crate::buffer::{Buffer, DiffResult};
+use crate::values::Dimensions;
 use crossterm::{cursor, execute, queue, style, terminal};
 use std::io::{stdout, Stdout, Write};
 
@@ -12,7 +13,7 @@ impl Terminal {
         let mut out = stdout();
         execute!(out, terminal::EnterAlternateScreen).unwrap();
         let (cols, rows) = terminal::size().unwrap();
-        let buffer = Buffer::new(cols as usize, rows as usize);
+        let buffer = Buffer::new(Dimensions::new(cols as usize, rows as usize));
 
         Terminal {
             stdout: out,
@@ -22,8 +23,10 @@ impl Terminal {
 
     pub fn resize(&mut self) -> bool {
         let (cols, rows) = terminal::size().unwrap();
-        if cols != self.buffer.width as u16 || rows != self.buffer.height as u16 {
-            self.buffer = Buffer::new(cols as usize, rows as usize);
+        if cols != self.buffer.dimensions.width as u16
+            || rows != self.buffer.dimensions.height as u16
+        {
+            self.buffer = Buffer::new(Dimensions::new(cols as usize, rows as usize));
             true
         } else {
             false
@@ -36,7 +39,7 @@ impl Terminal {
 
     pub fn prepare_buffer(&self) -> Buffer {
         let (cols, rows) = terminal::size().unwrap();
-        Buffer::new(cols as usize, rows as usize)
+        Buffer::new(Dimensions::new(cols as usize, rows as usize))
     }
 
     pub fn update(&mut self, updates: Buffer) {

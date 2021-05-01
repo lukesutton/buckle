@@ -11,53 +11,62 @@ widget, which is to truncate the text, not wrap it.";
     let h_layout = Auto::new(
         Dir::Horizontal,
         Layout::fixed(Align::Start, Align::Start, 1),
+        ContainerSizing::Fill,
+        ContainerSizing::Fixed(35),
     )
-    .add(
+    .add(MultilineText::new(
+        paragraph.to_string(),
         ContainerSizing::Fixed(80),
         ContainerSizing::Fill,
-        MultilineText::new(paragraph.to_string(), None),
-    )
+        None,
+    ))
     .rule(None)
-    .add(
+    .add(Label::new(
+        "Fill".to_string(),
         ContainerSizing::Fill,
         ContainerSizing::Fill,
-        Text::new(
-            "Fill".to_string(),
-            Some(
-                Style::new()
-                    .bold()
-                    .foreground(Color::Black)
-                    .background(Color::Green),
-            ),
+        Some(
+            Style::new()
+                .bold()
+                .foreground(Color::Black)
+                .background(Color::Green),
         ),
-    )
+    ))
     .rule(None)
-    .add(
+    .add(Label::new(
+        "Hug".to_string(),
         ContainerSizing::Hug,
         ContainerSizing::Fill,
-        Text::new("Hug".to_string(), None),
-    )
+        None,
+    ))
     .rule(None)
-    .add(
+    .add(Label::new(
+        "Fixed".to_string(),
         ContainerSizing::Fixed(20),
         ContainerSizing::Fill,
-        Text::new("Fixed".to_string(), None),
-    );
+        None,
+    ));
 
-    let v_layout = Auto::new(Dir::Vertical, Layout::default())
-        .add(ContainerSizing::Fill, ContainerSizing::Fixed(20), h_layout)
-        .rule(None)
-        .add(
-            ContainerSizing::Fill,
-            ContainerSizing::Fill,
-            Text::new("Ho there".to_string(), None),
-        );
+    let v_layout = Auto::new(
+        Dir::Vertical,
+        Layout::default(),
+        ContainerSizing::Fill,
+        ContainerSizing::Fill,
+    )
+    .add(h_layout)
+    .rule(None)
+    .add(Label::new(
+        "Ho there".to_string(),
+        ContainerSizing::Fill,
+        ContainerSizing::Fill,
+        None,
+    ));
 
     let mut buffer = terminal.prepare_buffer();
     v_layout.render(
         &Rect {
             origin: Point::zero(),
-            dimensions: Dimensions::new(buffer.width, buffer.height),
+            dimensions: buffer.dimensions.clone(),
         },
         &mut buffer,
     );

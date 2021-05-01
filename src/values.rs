@@ -82,6 +82,16 @@ pub enum ContainerSizing {
     Fixed(usize),
 }
 
+impl ContainerSizing {
+    pub fn simplify(&self, hug_value: usize) -> Sizing {
+        match self {
+            ContainerSizing::Hug => Sizing::Fixed(hug_value),
+            ContainerSizing::Fill => Sizing::Fill,
+            ContainerSizing::Fixed(size) => Sizing::Fixed(*size),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Dir {
     Horizontal,
@@ -196,19 +206,19 @@ impl Layout {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Constraints {
-    pub h: Sizing,
-    pub v: Sizing,
+    pub width: Sizing,
+    pub height: Sizing,
 }
 
 impl Constraints {
     pub fn rotate(&mut self) {
-        let h = self.h;
-        let v = self.v;
-        self.h = v;
-        self.v = h;
+        let width = self.width;
+        let height = self.height;
+        self.width = height;
+        self.height = width;
     }
 
-    pub fn new(h: Sizing, v: Sizing) -> Self {
-        Self { h, v }
+    pub fn new(width: Sizing, height: Sizing) -> Self {
+        Self { width, height }
     }
 }

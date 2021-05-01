@@ -11,23 +11,30 @@ const TWO: &'static str = "┌─┐
 fn main() {
     let mut terminal = Terminal::new();
 
-    let layout = Auto::new(Dir::Horizontal, Layout::packed(Align::Start, Align::Start))
-        .add(
-            ContainerSizing::Fixed(3),
-            ContainerSizing::Fixed(3),
-            MultilineText::new(ONE.to_string(), None),
-        )
-        .add(
-            ContainerSizing::Fixed(3),
-            ContainerSizing::Fixed(3),
-            MultilineText::new(TWO.to_string(), None),
-        );
+    let layout = Auto::new(
+        Dir::Horizontal,
+        Layout::packed(Align::Start, Align::Start),
+        ContainerSizing::Fill,
+        ContainerSizing::Fill,
+    )
+    .add(MultilineText::new(
+        ONE.to_string(),
+        ContainerSizing::Fixed(3),
+        ContainerSizing::Fixed(3),
+        None,
+    ))
+    .add(MultilineText::new(
+        TWO.to_string(),
+        ContainerSizing::Fixed(3),
+        ContainerSizing::Fixed(3),
+        None,
+    ));
 
     let mut buffer = terminal.prepare_buffer();
     layout.render(
         &Rect {
             origin: Point::zero(),
-            dimensions: Dimensions::new(buffer.width, buffer.height),
+            dimensions: buffer.dimensions.clone(),
         },
         &mut buffer,
     );

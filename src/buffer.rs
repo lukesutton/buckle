@@ -1,5 +1,5 @@
 use crate::styles::Style;
-use crate::values::{Point, Rect};
+use crate::values::{Dimensions, Point, Rect};
 pub use crossterm::style::{Attribute, Color, ContentStyle};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10,8 +10,7 @@ pub struct Cell {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Buffer {
-    pub width: usize,
-    pub height: usize,
+    pub dimensions: Dimensions,
     pub cells: Vec<Vec<Cell>>,
 }
 
@@ -38,22 +37,20 @@ pub const ARC_UP_LEFT: char = '╯';
 pub const ARC_UP_RIGHT: char = '╰';
 
 impl Buffer {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(dimensions: Dimensions) -> Self {
         let default = Cell {
             content: ' ',
             style: None,
         };
-        let row = vec![default; width];
-        let cells = vec![row; height];
-        Buffer {
-            width,
-            height,
-            cells,
-        }
+        let row = vec![default; dimensions.width];
+        let cells = vec![row; dimensions.height];
+        Buffer { dimensions, cells }
     }
 
     pub fn diff(&self, other: &Buffer) -> DiffResult {
-        if (self.width, self.height) != (other.width, other.height) {
+        if (self.dimensions.width, self.dimensions.height)
+            != (other.dimensions.width, other.dimensions.height)
+        {
             DiffResult::Invalid
         } else if self == other {
             DiffResult::NoChange
@@ -132,7 +129,7 @@ impl Buffer {
     }
 
     pub fn mut_cell(&mut self, x: usize, y: usize) -> &mut Cell {
-        if x > (self.width - 1) || y > (self.height - 1) {
+        if x > (self.dimensions.width - 1) || y > (self.dimensions.height - 1) {
             panic!("Provided point is outside of cells available in buffer")
         } else {
             &mut self.cells[y][x]

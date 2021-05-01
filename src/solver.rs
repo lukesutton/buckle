@@ -31,7 +31,7 @@ pub fn solve_auto(
         let mut result = remaining_bounds.clone();
 
         // Determine width
-        match constraints.h {
+        match constraints.width {
             Sizing::Fixed(amt) => {
                 result.dimensions.width = amt.clamp(0, remaining_bounds.dimensions.width);
                 remaining_bounds.dimensions.width -= result.dimensions.width;
@@ -40,7 +40,7 @@ pub fn solve_auto(
         }
 
         // Determine height
-        result.dimensions.height = match constraints.v {
+        result.dimensions.height = match constraints.height {
             Sizing::Fill => remaining_bounds.dimensions.height,
             Sizing::Fixed(amt) => amt.clamp(0, remaining_bounds.dimensions.height),
         };

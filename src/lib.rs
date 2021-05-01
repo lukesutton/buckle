@@ -1,13 +1,12 @@
 pub mod buffer;
-pub mod layout;
-mod solver;
+pub mod layouts;
 mod styles;
 pub mod terminal;
 pub mod values;
 mod views;
 
 pub use buffer::*;
-pub use layout::*;
+pub use layouts::*;
 pub use styles::*;
 pub use terminal::*;
 pub use values::*;

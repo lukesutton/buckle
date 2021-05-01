@@ -2,7 +2,7 @@ use crate::values::*;
 
 // Accept a list of constraints and a rect
 // Figure out how to fit all the constrained elements in the
-pub fn solve_auto(
+pub fn solve(
     items: &Vec<Constraints>,
     dir: &Dir,
     arrangement: &Layout,
@@ -196,7 +196,7 @@ mod auto_layout_tests {
     fn one_fill_width_and_height() {
         let items = vec![Constraints::new(Sizing::Fill, Sizing::Fill)];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         let solution = &results[0];
         assert_eq!(1, results.len());
         assert_eq!(&bounds, solution);
@@ -209,7 +209,7 @@ mod auto_layout_tests {
             Constraints::new(Sizing::Fill, Sizing::Fill),
         ];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         assert_eq!(2, results.len());
         assert_eq!(results[0], Rect::new_from_raw(0, 0, 50, 100));
         assert_eq!(results[1], Rect::new_from_raw(50, 0, 50, 100));
@@ -222,7 +222,7 @@ mod auto_layout_tests {
             Constraints::new(Sizing::Fixed(40), Sizing::Fill),
         ];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         assert_eq!(2, results.len());
         assert_eq!(results[0], Rect::new_from_raw(0, 0, 30, 100));
         assert_eq!(results[1], Rect::new_from_raw(30, 0, 40, 100));
@@ -236,7 +236,7 @@ mod auto_layout_tests {
             Constraints::new(Sizing::Fixed(40), Sizing::Fill),
         ];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         assert_eq!(3, results.len());
         assert_eq!(results[0], Rect::new_from_raw(0, 0, 40, 100));
         assert_eq!(results[1], Rect::new_from_raw(40, 0, 40, 100));
@@ -250,7 +250,7 @@ mod auto_layout_tests {
             Constraints::new(Sizing::Fixed(20), Sizing::Fill),
         ];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         assert_eq!(2, results.len());
         assert_eq!(results[0], Rect::new_from_raw(0, 0, 80, 100));
         assert_eq!(results[1], Rect::new_from_raw(80, 0, 20, 100));
@@ -264,7 +264,7 @@ mod auto_layout_tests {
             Constraints::new(Sizing::Fill, Sizing::Fill),
         ];
         let bounds = Rect::new_from_raw(0, 0, 100, 100);
-        let results = solve_auto(&items, &Dir::Horizontal, &Layout::default(), &bounds);
+        let results = solve(&items, &Dir::Horizontal, &Layout::default(), &bounds);
         assert_eq!(3, results.len());
         assert_eq!(results[0], Rect::new_from_raw(0, 0, 40, 100));
         assert_eq!(results[1], Rect::new_from_raw(40, 0, 20, 100));
@@ -279,7 +279,7 @@ mod auto_layout_tests {
             v: Align::Start,
             h: Align::End,
         };
-        let results = solve_auto(&items, &Dir::Horizontal, &arrangement, &bounds);
+        let results = solve(&items, &Dir::Horizontal, &arrangement, &bounds);
         assert_eq!(1, results.len());
         assert_eq!(results[0], Rect::new_from_raw(50, 0, 50, 50));
     }
@@ -292,7 +292,7 @@ mod auto_layout_tests {
             v: Align::Start,
             h: Align::Center,
         };
-        let results = solve_auto(&items, &Dir::Horizontal, &arrangement, &bounds);
+        let results = solve(&items, &Dir::Horizontal, &arrangement, &bounds);
         assert_eq!(1, results.len());
         assert_eq!(results[0], Rect::new_from_raw(25, 0, 50, 50));
     }
@@ -304,7 +304,7 @@ mod auto_layout_tests {
         fn filled() {
             let items = vec![Constraints::new(Sizing::Fill, Sizing::Fill)];
             let bounds = Rect::new_from_raw(0, 0, 50, 100);
-            let results = solve_auto(&items, &Dir::Vertical, &Layout::default(), &bounds);
+            let results = solve(&items, &Dir::Vertical, &Layout::default(), &bounds);
             assert_eq!(1, results.len());
             assert_eq!(results[0], Rect::new_from_raw(0, 0, 50, 100));
         }
@@ -316,7 +316,7 @@ mod auto_layout_tests {
                 Constraints::new(Sizing::Fixed(60), Sizing::Fill),
             ];
             let bounds = Rect::new_from_raw(0, 0, 100, 200);
-            let results = solve_auto(&items, &Dir::Vertical, &Layout::default(), &bounds);
+            let results = solve(&items, &Dir::Vertical, &Layout::default(), &bounds);
             assert_eq!(2, results.len());
             assert_eq!(results[0], Rect::new_from_raw(0, 0, 50, 100));
             assert_eq!(results[1], Rect::new_from_raw(0, 100, 60, 100));
@@ -329,7 +329,7 @@ mod auto_layout_tests {
                 Constraints::new(Sizing::Fill, Sizing::Fixed(120)),
             ];
             let bounds = Rect::new_from_raw(0, 0, 100, 200);
-            let results = solve_auto(&items, &Dir::Vertical, &Layout::default(), &bounds);
+            let results = solve(&items, &Dir::Vertical, &Layout::default(), &bounds);
             assert_eq!(2, results.len());
             assert_eq!(results[0], Rect::new_from_raw(0, 0, 50, 80));
             assert_eq!(results[1], Rect::new_from_raw(0, 80, 100, 120));

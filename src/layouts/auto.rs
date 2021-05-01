@@ -1,5 +1,5 @@
 use crate::buffer::Buffer;
-use crate::solver::solve_auto;
+use crate::layouts::auto_solver::solve;
 use crate::styles::Style;
 use crate::values::*;
 use crate::views::{HRule, Spacer, VRule, View};
@@ -75,7 +75,7 @@ impl View for Auto {
             .iter()
             .map(|i| i.sizing(&within.dimensions))
             .collect();
-        let layout = solve_auto(&items, &self.dir, &self.layout, &within);
+        let layout = solve(&items, &self.dir, &self.layout, &within);
         for (rect, item) in layout.iter().zip(&self.items) {
             item.render(&rect, buffer);
         }

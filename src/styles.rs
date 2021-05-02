@@ -1,5 +1,43 @@
 use crossterm::style::{Attribute, Color, ContentStyle};
 
+pub struct LineStyle {
+    pub corners: Corners,
+    pub stroke: Stroke,
+    pub style: Option<Style>,
+}
+
+impl LineStyle {
+    pub fn new(corners: Corners, stroke: Stroke, style: Option<Style>) -> Self {
+        Self {
+            corners,
+            stroke,
+            style,
+        }
+    }
+}
+
+impl Default for LineStyle {
+    fn default() -> Self {
+        Self {
+            corners: Corners::Regular,
+            stroke: Stroke::Solid,
+            style: None,
+        }
+    }
+}
+
+pub enum Stroke {
+    Solid,
+    Dashed,
+    Dotted,
+    Double,
+}
+
+pub enum Corners {
+    Regular,
+    Rounded,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Style {
     pub(crate) style: ContentStyle,

@@ -1,18 +1,21 @@
 use crate::buffer::Buffer;
+use crate::styles::LineStyle;
 use crate::values::{Constraints, Dimensions, Point, Rect, Sizing};
 use crate::views::View;
 
 pub struct PinBoard {
     width: Sizing,
     height: Sizing,
+    borders: Option<LineStyle>,
     pins: Vec<Pin>,
 }
 
 impl PinBoard {
-    pub fn new(width: Sizing, height: Sizing) -> Self {
+    pub fn new(width: Sizing, height: Sizing, borders: Option<LineStyle>) -> Self {
         Self {
             width,
             height,
+            borders: borders,
             pins: Vec::new(),
         }
     }
@@ -32,6 +35,15 @@ impl View for PinBoard {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        let mut within = within.clone();
+        if let Some(borders) = &self.borders {
+            buffer.draw_box(&within, false, &borders.style);
+            within.origin.x += 1;
+            within.origin.y += 1;
+            within.dimensions.width -= 2;
+            within.dimensions.height -= 2;
+        }
+
         for pin in &self.pins {
             match &pin.origin {
                 PinOrigin::TopLeft(point)
@@ -39,7 +51,7 @@ impl View for PinBoard {
                 | PinOrigin::BottomLeft(point)
                 | PinOrigin::BottomRight(point) => {
                     let mut dimensions = Dimensions::new(
-                        within.dimensions.height - point.x,
+                        within.dimensions.width - point.x,
                         within.dimensions.height - point.y,
                     );
                     let constraints = pin.item.sizing(&dimensions);
@@ -50,21 +62,28 @@ impl View for PinBoard {
                         dimensions.height = size.clamp(0, dimensions.height)
                     }
 
-                    // Offset point based on origin
-                    let mut offset = point.clone();
-                    match &pin.origin {
-                        PinOrigin::TopRight(_) => {
-                            offset.x = within.dimensions.width - dimensions.width - point.x;
+                    let offset = match &pin.origin {
+                        PinOrigin::TopLeft(_) => {
+                            Point::new(point.x + within.origin.x, point.y + within.origin.y)
                         }
-                        PinOrigin::BottomLeft(_) => {
-                            offset.y = within.dimensions.height - dimensions.height - point.y;
-                        }
-                        PinOrigin::BottomRight(_) => {
-                            offset.x = within.dimensions.width - dimensions.width - point.x;
-                            offset.y = within.dimensions.height - dimensions.height - point.y;
-                        }
-                        _ => (),
-                    }
+                        PinOrigin::TopRight(_) => Point::new(
+                            (within.dimensions.width - dimensions.width - point.x)
+                                + within.origin.x,
+                            within.origin.y + point.y,
+                        ),
+                        PinOrigin::BottomLeft(_) => Point::new(
+                            point.x + within.origin.x,
+                            (within.dimensions.height - dimensions.height - point.y)
+                                + within.origin.y,
+                        ),
+                        PinOrigin::BottomRight(_) => Point::new(
+                            (within.dimensions.width - dimensions.width - point.x)
+                                + within.origin.x,
+                            (within.dimensions.height - dimensions.height - point.y)
+                                + within.origin.y,
+                        ),
+                        _ => within.origin.clone(),
+                    };
 
                     let rect = Rect::new(offset, dimensions);
                     pin.item.render(&rect, buffer);
@@ -82,8 +101,8 @@ impl View for PinBoard {
                         },
                     );
                     let point = Point::new(
-                        (within.dimensions.width - dimensions.width) / 2,
-                        (within.dimensions.height - dimensions.height) / 2,
+                        (within.dimensions.width - dimensions.width) / 2 + within.origin.x,
+                        (within.dimensions.height - dimensions.height) / 2 + within.origin.y,
                     );
                     let rect = Rect::new(point, dimensions);
                     pin.item.render(&rect, buffer);

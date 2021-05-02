@@ -3,7 +3,7 @@ use buckle::*;
 fn main() {
     let mut terminal = Terminal::new();
 
-    let layout = PinBoard::new(Sizing::Fill, Sizing::Fill)
+    let layout = PinBoard::new(Sizing::Fill, Sizing::Fill, Some(LineStyle::default()))
         .add(
             PinOrigin::TopLeft(Point::zero()),
             Label::new(
@@ -89,8 +89,11 @@ fn main() {
     let mut buffer = terminal.prepare_buffer();
     layout.render(
         &Rect {
-            origin: Point::zero(),
-            dimensions: buffer.dimensions.clone(),
+            origin: Point::new(10, 5),
+            dimensions: Dimensions {
+                width: buffer.dimensions.width - 20,
+                height: buffer.dimensions.height - 10,
+            },
         },
         &mut buffer,
     );

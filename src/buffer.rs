@@ -142,7 +142,7 @@ impl Buffer {
         }
     }
 
-    pub fn draw_box(&mut self, rect: Rect, rounded: bool, style: Option<Style>) {
+    pub fn draw_box(&mut self, rect: &Rect, rounded: bool, style: &Option<Style>) {
         let last = rect.origin.x + rect.dimensions.width;
         let last_inset = last - 1;
         let bottom_y = rect.origin.y + rect.dimensions.height;

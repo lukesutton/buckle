@@ -61,6 +61,18 @@ impl Style {
         }
     }
 
+    /// Merges in style values from another, but preserves the background
+    /// color, except in the case where the other defines one.
+    pub fn update(&mut self, other: &Style) {
+        match (self.style.background_color, other.style.background_color) {
+            (Some(color), None) => {
+                self.style = other.style.clone();
+                self.style.background(color);
+            }
+            _ => self.style = other.style.clone(),
+        }
+    }
+
     pub fn background(mut self, color: Color) -> Self {
         self.style.background_color = Some(color);
         self

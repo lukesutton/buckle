@@ -8,6 +8,19 @@ pub struct Cell {
     pub style: Option<Style>,
 }
 
+impl Cell {
+    /// An update that preserves the original background colour, unless the
+    /// other style provides one.
+    fn update(&mut self, content: char, other: &Option<Style>) {
+        self.content = content;
+        match (self.style, other) {
+            (None, Some(_)) => self.style = other.clone(),
+            (Some(mut existing), Some(update)) => existing.update(&update),
+            _ => (),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Buffer {
     pub dimensions: Dimensions,
@@ -99,7 +112,7 @@ impl Buffer {
     pub fn draw_text(&mut self, at: &Point, text: &str, style: &Option<Style>) {
         let pairs = (at.x..(text.len() + at.x)).zip(text.chars());
         for (x, c) in pairs {
-            self.draw_cell(Point { x, y: at.y }, c, style.clone())
+            self.mut_cell(x, at.y).update(c, style);
         }
     }
 
@@ -108,14 +121,11 @@ impl Buffer {
             if line_number < within.dimensions.height {
                 for (entry_number, entry) in line.chars().enumerate() {
                     if entry_number < within.dimensions.width {
-                        self.draw_cell(
-                            Point {
-                                x: within.origin.x + entry_number,
-                                y: within.origin.y + line_number,
-                            },
-                            entry,
-                            style.clone(),
+                        self.mut_cell(
+                            within.origin.x + entry_number,
+                            within.origin.y + line_number,
                         )
+                        .update(entry, style);
                     }
                 }
             }
@@ -124,7 +134,7 @@ impl Buffer {
 
     pub fn draw_h_rule(&mut self, at: &Point, length: usize, style: &Option<Style>) {
         for x in at.x..(at.x + length) {
-            self.draw_cell(Point { x, y: at.y }, H_LINE, style.clone())
+            self.mut_cell(x, at.y).update(H_LINE, style);
         }
     }
 
@@ -138,7 +148,7 @@ impl Buffer {
 
     pub fn draw_v_rule(&mut self, at: &Point, length: usize, style: &Option<Style>) {
         for y in at.y..(at.y + length) {
-            self.draw_cell(Point { x: at.x, y }, V_LINE, style.clone())
+            self.mut_cell(at.x, y).update(V_LINE, style);
         }
     }
 
@@ -146,9 +156,7 @@ impl Buffer {
         let char = char.unwrap_or(' ');
         for row in within.origin.y..(within.origin.y + within.dimensions.height) {
             for col in within.origin.x..(within.origin.x + within.dimensions.width) {
-                let mut cell = self.mut_cell(col, row);
-                cell.content = char;
-                cell.style = Some(style);
+                self.mut_cell(col, row).update(char, &Some(style));
             }
         }
     }
@@ -166,17 +174,10 @@ impl Buffer {
                 } else {
                     (DOWN_RIGHT, UP_RIGHT)
                 };
-                self.draw_cell(
-                    Point {
-                        x: x,
-                        y: rect.origin.y,
-                    },
-                    top,
-                    style.clone(),
-                );
-                self.draw_cell(Point { x: x, y: y_inset }, bottom, style.clone());
+                self.mut_cell(x, rect.origin.y).update(top, style);
+                self.mut_cell(x, y_inset).update(bottom, style);
                 for y in (rect.origin.y + 1)..y_inset {
-                    self.draw_cell(Point { x: x, y: y }, V_LINE, style.clone());
+                    self.mut_cell(x, y).update(V_LINE, style);
                 }
             } else if x == last_inset {
                 let (top, bottom) = if rounded {
@@ -184,28 +185,15 @@ impl Buffer {
                 } else {
                     (DOWN_LEFT, UP_LEFT)
                 };
-                self.draw_cell(
-                    Point {
-                        x: x,
-                        y: rect.origin.y,
-                    },
-                    top,
-                    style.clone(),
-                );
+                self.mut_cell(x, rect.origin.y).update(top, style);
                 self.draw_cell(Point { x: x, y: y_inset }, bottom, style.clone());
+                self.mut_cell(x, y_inset).update(bottom, style);
                 for y in (rect.origin.y + 1)..y_inset {
-                    self.draw_cell(Point { x: x, y: y }, V_LINE, style.clone());
+                    self.mut_cell(x, y).update(V_LINE, style);
                 }
             } else {
-                self.draw_cell(
-                    Point {
-                        x: x,
-                        y: rect.origin.y,
-                    },
-                    H_LINE,
-                    style.clone(),
-                );
-                self.draw_cell(Point { x: x, y: y_inset }, H_LINE, style.clone());
+                self.mut_cell(x, rect.origin.y).update(H_LINE, style);
+                self.mut_cell(x, y_inset).update(H_LINE, style);
             }
         }
     }

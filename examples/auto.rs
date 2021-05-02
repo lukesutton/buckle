@@ -15,7 +15,10 @@ widget, which is to truncate the text, not wrap it.";
         ContainerSizing::Fixed(35),
     )
     .borders(LineStyle::default())
-    .fill(FillStyle::new(None, Style::new().background(Color::Green)))
+    .fill(FillStyle::new(
+        None,
+        Style::new().background(Color::DarkBlue),
+    ))
     .add(MultilineText::new(
         paragraph.to_string(),
         ContainerSizing::Fixed(80),

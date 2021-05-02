@@ -1,6 +1,6 @@
 use crate::buffer::Buffer;
 use crate::layouts::auto_solver::solve;
-use crate::styles::Style;
+use crate::styles::{LineStyle, Style};
 use crate::values::*;
 use crate::views::{HRule, Spacer, VRule, View};
 
@@ -11,16 +11,24 @@ pub struct Auto {
     layout: Layout,
     width: ContainerSizing,
     height: ContainerSizing,
+    borders: Option<LineStyle>,
     items: Vec<Box<dyn View>>,
 }
 
 impl Auto {
-    pub fn new(dir: Dir, layout: Layout, width: ContainerSizing, height: ContainerSizing) -> Self {
+    pub fn new(
+        dir: Dir,
+        layout: Layout,
+        width: ContainerSizing,
+        height: ContainerSizing,
+        borders: Option<LineStyle>,
+    ) -> Self {
         Auto {
             dir,
             layout,
             width,
             height,
+            borders,
             items: Vec::new(),
         }
     }
@@ -70,6 +78,15 @@ impl View for Auto {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        let mut within = within.clone();
+        if let Some(borders) = &self.borders {
+            buffer.draw_box(&within, false, &borders.style);
+            within.origin.x += 1;
+            within.origin.y += 1;
+            within.dimensions.width -= 2;
+            within.dimensions.height -= 2;
+        }
+
         let items: Vec<Constraints> = self
             .items
             .iter()

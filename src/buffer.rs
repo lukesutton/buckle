@@ -142,6 +142,17 @@ impl Buffer {
         }
     }
 
+    pub fn draw_fill(&mut self, within: &Rect, style: Style, char: Option<char>) {
+        let char = char.unwrap_or(' ');
+        for row in within.origin.y..(within.origin.y + within.dimensions.height) {
+            for col in within.origin.x..(within.origin.x + within.dimensions.width) {
+                let mut cell = self.mut_cell(col, row);
+                cell.content = char;
+                cell.style = Some(style);
+            }
+        }
+    }
+
     pub fn draw_box(&mut self, rect: &Rect, rounded: bool, style: &Option<Style>) {
         let last = rect.origin.x + rect.dimensions.width;
         let last_inset = last - 1;

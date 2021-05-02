@@ -13,8 +13,9 @@ widget, which is to truncate the text, not wrap it.";
         Layout::fixed(Align::Start, Align::Start, 1),
         ContainerSizing::Fill,
         ContainerSizing::Fixed(35),
-        Some(LineStyle::default()),
     )
+    .borders(LineStyle::default())
+    .fill(FillStyle::new(None, Style::new().background(Color::Green)))
     .add(MultilineText::new(
         paragraph.to_string(),
         ContainerSizing::Fixed(80),
@@ -53,8 +54,8 @@ widget, which is to truncate the text, not wrap it.";
         Layout::default(),
         ContainerSizing::Fill,
         ContainerSizing::Fill,
-        Some(LineStyle::default()),
     )
+    .borders(LineStyle::default())
     .add(h_layout)
     .rule(None)
     .add(Label::new(

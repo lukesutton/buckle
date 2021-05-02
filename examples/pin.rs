@@ -3,7 +3,14 @@ use buckle::*;
 fn main() {
     let mut terminal = Terminal::new();
 
-    let layout = PinBoard::new(Sizing::Fill, Sizing::Fill, Some(LineStyle::default()))
+    let layout = PinBoard::new(Sizing::Fill, Sizing::Fill)
+        .borders(LineStyle::default())
+        .fill(FillStyle::new(
+            Some('.'),
+            Style::new()
+                .background(Color::DarkGrey)
+                .foreground(Color::Grey),
+        ))
         .add(
             PinOrigin::TopLeft(Point::zero()),
             Label::new(

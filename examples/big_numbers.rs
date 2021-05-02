@@ -16,7 +16,6 @@ fn main() {
         Layout::packed(Align::Start, Align::Start),
         ContainerSizing::Fill,
         ContainerSizing::Fill,
-        None,
     )
     .add(MultilineText::new(
         ONE.to_string(),

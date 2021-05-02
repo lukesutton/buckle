@@ -1,6 +1,6 @@
 use crate::buffer::Buffer;
 use crate::layouts::auto_solver::solve;
-use crate::styles::{LineStyle, Style};
+use crate::styles::{FillStyle, LineStyle, Style};
 use crate::values::*;
 use crate::views::{HRule, Spacer, VRule, View};
 
@@ -11,26 +11,32 @@ pub struct Auto {
     layout: Layout,
     width: ContainerSizing,
     height: ContainerSizing,
-    borders: Option<LineStyle>,
+    border_style: Option<LineStyle>,
+    fill_style: Option<FillStyle>,
     items: Vec<Box<dyn View>>,
 }
 
 impl Auto {
-    pub fn new(
-        dir: Dir,
-        layout: Layout,
-        width: ContainerSizing,
-        height: ContainerSizing,
-        borders: Option<LineStyle>,
-    ) -> Self {
+    pub fn new(dir: Dir, layout: Layout, width: ContainerSizing, height: ContainerSizing) -> Self {
         Auto {
             dir,
             layout,
             width,
             height,
-            borders,
+            border_style: None,
+            fill_style: None,
             items: Vec::new(),
         }
+    }
+
+    pub fn borders(mut self, borders: LineStyle) -> Self {
+        self.border_style = Some(borders);
+        self
+    }
+
+    pub fn fill(mut self, fill: FillStyle) -> Self {
+        self.fill_style = Some(fill);
+        self
     }
 
     pub fn add<V: 'static + View>(mut self, item: V) -> Self {
@@ -79,12 +85,15 @@ impl View for Auto {
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
         let mut within = within.clone();
-        if let Some(borders) = &self.borders {
+        if let Some(borders) = &self.border_style {
             buffer.draw_box(&within, false, &borders.style);
             within.origin.x += 1;
             within.origin.y += 1;
             within.dimensions.width -= 2;
             within.dimensions.height -= 2;
+        }
+        if let Some(fill) = &self.fill_style {
+            buffer.draw_fill(&within, fill.style, fill.repeating);
         }
 
         let items: Vec<Constraints> = self

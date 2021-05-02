@@ -1,5 +1,16 @@
 use crossterm::style::{Attribute, Color, ContentStyle};
 
+pub struct FillStyle {
+    pub repeating: Option<char>,
+    pub style: Style,
+}
+
+impl FillStyle {
+    pub fn new(repeating: Option<char>, style: Style) -> Self {
+        Self { repeating, style }
+    }
+}
+
 pub struct LineStyle {
     pub corners: Corners,
     pub stroke: Stroke,

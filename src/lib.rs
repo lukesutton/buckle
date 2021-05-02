@@ -1,8 +1,8 @@
-pub mod buffer;
-pub mod layouts;
+mod buffer;
+mod layouts;
 mod styles;
-pub mod terminal;
-pub mod values;
+mod terminal;
+mod values;
 mod views;
 
 pub use buffer::*;

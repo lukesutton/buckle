@@ -1,6 +1,5 @@
 use crate::styles::Style;
 use crate::values::{Dimensions, Point, Rect};
-pub use crossterm::style::{Attribute, Color, ContentStyle};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cell {

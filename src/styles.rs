@@ -1,4 +1,5 @@
-use crossterm::style::{Attribute, Color, ContentStyle};
+pub use crossterm::style::Color;
+use crossterm::style::{Attribute, ContentStyle};
 
 pub struct FillStyle {
     pub repeating: Option<char>,

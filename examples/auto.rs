@@ -25,7 +25,7 @@ widget, which is to truncate the text, not wrap it.";
         ContainerSizing::Fill,
         None,
     ))
-    .rule(None)
+    .split()
     .add(Label::new(
         "Fill".to_string(),
         ContainerSizing::Fill,
@@ -37,14 +37,14 @@ widget, which is to truncate the text, not wrap it.";
                 .background(Color::Green),
         ),
     ))
-    .rule(None)
+    .split()
     .add(Label::new(
         "Hug".to_string(),
         ContainerSizing::Hug,
         ContainerSizing::Fill,
         None,
     ))
-    .rule(None)
+    .split()
     .add(Label::new(
         "Fixed".to_string(),
         ContainerSizing::Fixed(20),
@@ -60,7 +60,7 @@ widget, which is to truncate the text, not wrap it.";
     )
     .borders(LineStyle::default())
     .add(h_layout)
-    .rule(None)
+    .split()
     .add(Label::new(
         "Ho there".to_string(),
         ContainerSizing::Fill,

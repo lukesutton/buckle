@@ -1,4 +1,4 @@
-use crate::buffer::Buffer;
+use crate::buffer::{Buffer, DOWN_HORIZONTAL, UP_HORIZONTAL, VERTICAL_LEFT, VERTICAL_RIGHT};
 use crate::layouts::auto_solver::solve;
 use crate::styles::{FillStyle, LineStyle, Style};
 use crate::values::*;
@@ -14,6 +14,7 @@ pub struct Auto {
     border_style: Option<LineStyle>,
     fill_style: Option<FillStyle>,
     items: Vec<Box<dyn View>>,
+    splits: Vec<usize>,
 }
 
 impl Auto {
@@ -26,6 +27,7 @@ impl Auto {
             border_style: None,
             fill_style: None,
             items: Vec::new(),
+            splits: Vec::new(),
         }
     }
 
@@ -49,6 +51,23 @@ impl Auto {
             Dir::Horizontal => self.items.push(Box::new(VRule::new(style))),
             Dir::Vertical => self.items.push(Box::new(HRule::new(style))),
         }
+
+        self
+    }
+
+    pub fn split(mut self) -> Self {
+        let split = match self.dir {
+            Dir::Horizontal => Split {
+                width: Sizing::Fixed(1),
+                height: Sizing::Fill,
+            },
+            Dir::Vertical => Split {
+                width: Sizing::Fill,
+                height: Sizing::Fixed(1),
+            },
+        };
+        self.splits.push(self.items.len());
+        self.items.push(Box::new(split));
 
         self
     }
@@ -84,6 +103,9 @@ impl View for Auto {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        if let Some(fill) = &self.fill_style {
+            buffer.draw_fill(&within, fill.style, fill.repeating);
+        }
         let mut within = within.clone();
         if let Some(borders) = &self.border_style {
             buffer.draw_box(&within, false, &borders.style);
@@ -91,9 +113,6 @@ impl View for Auto {
             within.origin.y += 1;
             within.dimensions.width -= 2;
             within.dimensions.height -= 2;
-        }
-        if let Some(fill) = &self.fill_style {
-            buffer.draw_fill(&within, fill.style, fill.repeating);
         }
 
         let items: Vec<Constraints> = self
@@ -105,5 +124,62 @@ impl View for Auto {
         for (rect, item) in layout.iter().zip(&self.items) {
             item.render(&rect, buffer);
         }
+
+        if let Some(borders) = &self.border_style {
+            for i in &self.splits {
+                let rect = &layout[*i];
+                match self.dir {
+                    Dir::Horizontal => {
+                        buffer.draw_v_rule(&rect.origin, rect.dimensions.height, &borders.style);
+                        buffer.draw_char(
+                            rect.origin.x,
+                            rect.origin.y - 1,
+                            DOWN_HORIZONTAL,
+                            &borders.style,
+                        );
+                        buffer.draw_char(
+                            rect.origin.x,
+                            rect.origin.y + rect.dimensions.height,
+                            UP_HORIZONTAL,
+                            &borders.style,
+                        );
+                    }
+                    Dir::Vertical => {
+                        buffer.draw_h_rule(&rect.origin, rect.dimensions.width, &borders.style);
+                        buffer.draw_char(
+                            rect.origin.x - 1,
+                            rect.origin.y,
+                            VERTICAL_RIGHT,
+                            &borders.style,
+                        );
+                        buffer.draw_char(
+                            rect.origin.x + rect.dimensions.width,
+                            rect.origin.y,
+                            VERTICAL_LEFT,
+                            &borders.style,
+                        );
+                    }
+                }
+            }
+        }
     }
+}
+
+struct Split {
+    width: Sizing,
+    height: Sizing,
+}
+
+impl View for Split {
+    fn sizing(&self, _: &Dimensions) -> Constraints {
+        Constraints {
+            width: self.width,
+            height: self.height,
+        }
+    }
+
+    // This is a no-op, since the actual rendering of splits is handled by
+    // it's view. It is only implemented as a view so it can participate in
+    // positioning.
+    fn render(&self, _: &Rect, _: &mut Buffer) {}
 }

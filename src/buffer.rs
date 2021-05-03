@@ -145,6 +145,10 @@ impl Buffer {
         }
     }
 
+    pub fn draw_char(&mut self, x: usize, y: usize, content: char, style: &Option<Style>) {
+        self.mut_cell(x, y).update(content, style);
+    }
+
     pub fn draw_v_rule(&mut self, at: &Point, length: usize, style: &Option<Style>) {
         for y in at.y..(at.y + length) {
             self.mut_cell(at.x, y).update(V_LINE, style);

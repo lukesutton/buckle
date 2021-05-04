@@ -31,6 +31,39 @@ impl Auto {
         }
     }
 
+    pub fn vertical() -> Self {
+        Self::new(
+            Dir::Vertical,
+            Layout::default(),
+            ContainerSizing::Fill,
+            ContainerSizing::Fill,
+        )
+    }
+
+    pub fn horizontal() -> Self {
+        Self::new(
+            Dir::Horizontal,
+            Layout::default(),
+            ContainerSizing::Fill,
+            ContainerSizing::Fill,
+        )
+    }
+
+    pub fn layout(mut self, layout: Layout) -> Self {
+        self.layout = layout;
+        self
+    }
+
+    pub fn width(mut self, width: ContainerSizing) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn height(mut self, height: ContainerSizing) -> Self {
+        self.height = height;
+        self
+    }
+
     pub fn borders(mut self, borders: LineStyle) -> Self {
         self.border_style = Some(borders);
         self

@@ -23,42 +23,35 @@ widget, which is to truncate the text, not wrap it.";
             None,
         ))
         .split()
-        .add(Label::new(
-            "Fill".to_string(),
-            ContainerSizing::Fill,
-            ContainerSizing::Fill,
-            Some(
-                Style::new()
-                    .bold()
-                    .foreground(Color::Black)
-                    .background(Color::Green),
-            ),
-        ))
+        .add(
+            Label::new("Fill".to_string())
+                .width(ContainerSizing::Fill)
+                .height(ContainerSizing::Fill)
+                .style(
+                    Style::new()
+                        .bold()
+                        .foreground(Color::Black)
+                        .background(Color::Green),
+                ),
+        )
         .split()
-        .add(Label::new(
-            "Hug".to_string(),
-            ContainerSizing::Hug,
-            ContainerSizing::Fill,
-            None,
-        ))
+        .add(Label::new("Hug".to_string()).height(ContainerSizing::Fill))
         .split()
-        .add(Label::new(
-            "Fixed".to_string(),
-            ContainerSizing::Fixed(20),
-            ContainerSizing::Fill,
-            None,
-        ));
+        .add(
+            Label::new("Fixed".to_string())
+                .width(ContainerSizing::Fixed(20))
+                .height(ContainerSizing::Fill),
+        );
 
     let v_layout = Auto::vertical()
         .borders(LineStyle::default())
         .add(h_layout)
         .split()
-        .add(Label::new(
-            "Ho there".to_string(),
-            ContainerSizing::Fill,
-            ContainerSizing::Fill,
-            None,
-        ));
+        .add(
+            Label::new("Ho there".to_string())
+                .width(ContainerSizing::Fill)
+                .height(ContainerSizing::Fill),
+        );
 
     let mut buffer = terminal.prepare_buffer();
     v_layout.render(

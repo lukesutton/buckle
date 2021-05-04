@@ -16,12 +16,7 @@ widget, which is to truncate the text, not wrap it.";
             None,
             Style::new().background(Color::DarkBlue),
         ))
-        .add(MultilineText::new(
-            paragraph.to_string(),
-            ContainerSizing::Fixed(80),
-            ContainerSizing::Fill,
-            None,
-        ))
+        .add(MultilineText::new(paragraph.to_string()).width(ContainerSizing::Fixed(80)))
         .split()
         .add(
             Label::new("Fill".to_string())

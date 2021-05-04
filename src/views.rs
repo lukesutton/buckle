@@ -79,18 +79,28 @@ pub struct MultilineText {
 }
 
 impl MultilineText {
-    pub fn new(
-        text: String,
-        width: ContainerSizing,
-        height: ContainerSizing,
-        style: Option<Style>,
-    ) -> Self {
+    pub fn new(text: String) -> Self {
         Self {
             text,
-            width,
-            height,
-            style,
+            width: ContainerSizing::Hug,
+            height: ContainerSizing::Hug,
+            style: None,
         }
+    }
+
+    pub fn width(mut self, width: ContainerSizing) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn height(mut self, height: ContainerSizing) -> Self {
+        self.height = height;
+        self
+    }
+
+    pub fn style(mut self, style: Style) -> Self {
+        self.style = Some(style);
+        self
     }
 }
 

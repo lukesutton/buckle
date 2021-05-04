@@ -1,8 +1,8 @@
 use buckle::*;
 
-const ONE: &'static str = " ─┐ 
-  │ 
- ─┴─";
+const ONE: &'static str = "─┐ 
+ │ 
+─┴─";
 
 const TWO: &'static str = "┌─┐
 ┌─┘
@@ -17,18 +17,16 @@ fn main() {
         ContainerSizing::Fill,
         ContainerSizing::Fill,
     )
-    .add(MultilineText::new(
-        ONE.to_string(),
-        ContainerSizing::Fixed(3),
-        ContainerSizing::Fixed(3),
-        None,
-    ))
-    .add(MultilineText::new(
-        TWO.to_string(),
-        ContainerSizing::Fixed(3),
-        ContainerSizing::Fixed(3),
-        None,
-    ));
+    .add(
+        MultilineText::new(ONE.to_string())
+            .width(ContainerSizing::Fixed(3))
+            .height(ContainerSizing::Fixed(3)),
+    )
+    .add(
+        MultilineText::new(TWO.to_string())
+            .width(ContainerSizing::Fixed(3))
+            .height(ContainerSizing::Fixed(3)),
+    );
 
     let mut buffer = terminal.prepare_buffer();
     layout.render(

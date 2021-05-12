@@ -59,6 +59,15 @@ impl Buffer {
         Buffer { dimensions, cells }
     }
 
+    pub fn truncate(&mut self, from: Point, to: Point) {
+        self.cells.truncate(to.y);
+        self.cells.drain(0..from.y);
+        for row in &mut self.cells {
+            row.truncate(to.x);
+            row.drain(0..from.x);
+        }
+    }
+
     pub fn diff(&self, other: &Buffer) -> DiffResult {
         if (self.dimensions.width, self.dimensions.height)
             != (other.dimensions.width, other.dimensions.height)
@@ -84,7 +93,7 @@ impl Buffer {
     /// A convenience for taking a sized buffer and merging it into another.
     /// The intention is to allow sub-layouts to be generated independently,
     /// then merged with a larger layout.
-    pub fn merge(&mut self, at: Point, other: Buffer) {
+    pub fn merge(&mut self, at: &Point, other: &Buffer) {
         // TODO: This is a slow way of doing it. Just merging vectors might
         // be quicker
         for (y, cells) in other.cells.iter().enumerate() {

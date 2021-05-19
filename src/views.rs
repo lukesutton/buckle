@@ -56,7 +56,9 @@ impl Label {
 impl View for Label {
     fn sizing(&self, bounds: &Dimensions) -> Constraints {
         Constraints {
-            width: self.width.simplify(self.text.len().clamp(0, bounds.width)),
+            width: self
+                .width
+                .simplify(self.text.chars().count().clamp(0, bounds.width)),
             height: self.height.simplify(1),
         }
     }

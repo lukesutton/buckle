@@ -62,9 +62,10 @@ impl View for Label {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        if self.text.len() > within.dimensions.width {
-            let (prefix, _) = self.text.split_at(within.dimensions.width);
-            buffer.draw_text(&within.origin, prefix, &self.style);
+        if self.text.chars().count() > within.dimensions.width {
+            let mut prefix = self.text.clone();
+            prefix.truncate(within.dimensions.width);
+            buffer.draw_text(&within.origin, &prefix, &self.style);
         } else {
             buffer.draw_text(&within.origin, &self.text, &self.style);
         }

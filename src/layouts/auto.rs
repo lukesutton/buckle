@@ -1,3 +1,5 @@
+use std::array::IntoIter;
+
 use crate::buffer::{Buffer, DOWN_HORIZONTAL, UP_HORIZONTAL, VERTICAL_LEFT, VERTICAL_RIGHT};
 use crate::layouts::auto_solver::solve;
 use crate::styles::{FillStyle, LineStyle, Style};
@@ -76,6 +78,18 @@ impl Auto {
 
     pub fn add<V: 'static + View>(mut self, item: V) -> Self {
         self.items.push(Box::new(item));
+        self
+    }
+
+    pub fn add_each<I, F, V>(mut self, items: I, render: F) -> Self
+    where
+        I: IntoIterator,
+        V: 'static + View,
+        F: Fn(&I::Item) -> V,
+    {
+        for item in items {
+            self.items.push(Box::new(render(&item)));
+        }
         self
     }
 

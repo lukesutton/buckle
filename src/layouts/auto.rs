@@ -1,5 +1,3 @@
-use std::array::IntoIter;
-
 use crate::buffer::{Buffer, DOWN_HORIZONTAL, UP_HORIZONTAL, VERTICAL_LEFT, VERTICAL_RIGHT};
 use crate::layouts::auto_solver::solve;
 use crate::styles::{FillStyle, LineStyle, Style};
@@ -127,18 +125,50 @@ impl Auto {
 
 impl View for Auto {
     fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        // TODO:
+        // Look at optimising this by avoiding sizing calculations when the
+        // layout has a fixed or fill sizing in a particular axis.
+
         let mut height = 0;
         let mut width = 0;
-        for item in &self.items {
-            let constraints = item.sizing(&bounds);
-            if let Sizing::Fixed(w) = constraints.width {
-                if w > width {
-                    width = w
+
+        match self.dir {
+            Dir::Horizontal => {
+                for item in &self.items {
+                    let constraints = item.sizing(&bounds);
+
+                    match constraints.width {
+                        Sizing::Fill => width = bounds.width,
+                        Sizing::Fixed(n) => width = (width + n).clamp(0, bounds.width),
+                    }
+
+                    match constraints.height {
+                        Sizing::Fill => height = bounds.height,
+                        Sizing::Fixed(n) => {
+                            if n > height {
+                                height = n.clamp(0, bounds.height)
+                            }
+                        }
+                    }
                 }
             }
-            if let Sizing::Fixed(h) = constraints.height {
-                if h > height {
-                    height = h
+            Dir::Vertical => {
+                for item in &self.items {
+                    let constraints = item.sizing(&bounds);
+
+                    match constraints.height {
+                        Sizing::Fill => height = bounds.height,
+                        Sizing::Fixed(n) => height = (height + n).clamp(0, bounds.height),
+                    }
+
+                    match constraints.width {
+                        Sizing::Fill => width = bounds.width,
+                        Sizing::Fixed(n) => {
+                            if n > width {
+                                width = n.clamp(0, bounds.width)
+                            }
+                        }
+                    }
                 }
             }
         }

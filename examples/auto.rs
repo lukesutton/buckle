@@ -43,9 +43,15 @@ widget, which is to truncate the text, not wrap it.";
         .add(h_layout)
         .split()
         .add(
-            Label::new("Ho there".to_string())
-                .width(ContainerSizing::Fill)
-                .height(ContainerSizing::Fill),
+            Auto::vertical()
+                .fill(FillStyle::new(None, Style::new().background(Color::Red)))
+                .height(ContainerSizing::Hug)
+                .add(Label::new("Before".to_string()))
+                .rule(None)
+                .add(Label::new("After".to_string()))
+                .add(Label::new("Another After".to_string()))
+                .add(Label::new("More After".to_string()))
+                .add(Label::new("Final After".to_string())),
         );
 
     let mut buffer = terminal.prepare_buffer();

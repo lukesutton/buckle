@@ -28,9 +28,9 @@ pub struct Label {
 }
 
 impl Label {
-    pub fn new(text: String) -> Self {
+    pub fn new(text: &str) -> Self {
         Self {
-            text,
+            text: text.to_string(),
             width: ContainerSizing::Hug,
             height: ContainerSizing::Hug,
             style: None,
@@ -82,9 +82,9 @@ pub struct MultilineText {
 }
 
 impl MultilineText {
-    pub fn new(text: String) -> Self {
+    pub fn new(text: &str) -> Self {
         Self {
-            text,
+            text: text.to_string(),
             width: ContainerSizing::Hug,
             height: ContainerSizing::Hug,
             style: None,

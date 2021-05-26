@@ -16,10 +16,10 @@ widget, which is to truncate the text, not wrap it.";
             None,
             Style::new().background(Color::DarkBlue),
         ))
-        .add(MultilineText::new(paragraph.to_string()).width(ContainerSizing::Fixed(80)))
+        .add(MultilineText::new(paragraph).width(ContainerSizing::Fixed(80)))
         .split()
         .add(
-            Label::new("Fill".to_string())
+            Label::new("Fill")
                 .width(ContainerSizing::Fill)
                 .height(ContainerSizing::Fill)
                 .style(
@@ -30,10 +30,10 @@ widget, which is to truncate the text, not wrap it.";
                 ),
         )
         .split()
-        .add(Label::new("Hug".to_string()).height(ContainerSizing::Fill))
+        .add(Label::new("Hug").height(ContainerSizing::Fill))
         .split()
         .add(
-            Label::new("Fixed".to_string())
+            Label::new("Fixed")
                 .width(ContainerSizing::Fixed(20))
                 .height(ContainerSizing::Fill),
         );
@@ -46,12 +46,12 @@ widget, which is to truncate the text, not wrap it.";
             Auto::vertical()
                 .fill(FillStyle::new(None, Style::new().background(Color::Red)))
                 .height(ContainerSizing::Fixed(4))
-                .add(Label::new("Before".to_string()))
+                .add(Label::new("Before"))
                 .rule(None)
-                .add(Label::new("After".to_string()))
-                .add(Label::new("Another After".to_string()))
-                .add(Label::new("More After".to_string()))
-                .add(Label::new("Final After".to_string())),
+                .add(Label::new("After"))
+                .add(Label::new("Another After"))
+                .add(Label::new("More After"))
+                .add(Label::new("Final After")),
         );
 
     let mut buffer = terminal.prepare_buffer();

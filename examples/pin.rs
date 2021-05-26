@@ -11,39 +11,33 @@ fn main() {
                 .background(Color::DarkGrey)
                 .foreground(Color::Grey),
         ))
-        .add(
-            PinOrigin::TopLeft(Point::zero()),
-            Label::new("Top Left".to_string()),
-        )
+        .add(PinOrigin::TopLeft(Point::zero()), Label::new("Top Left"))
         .add(
             PinOrigin::TopLeft(Point::new(10, 4)),
-            Label::new("Top Left Offset".to_string()),
+            Label::new("Top Left Offset"),
         )
-        .add(
-            PinOrigin::TopRight(Point::zero()),
-            Label::new("Top Right".to_string()),
-        )
+        .add(PinOrigin::TopRight(Point::zero()), Label::new("Top Right"))
         .add(
             PinOrigin::TopRight(Point::new(10, 4)),
-            Label::new("Top Right Offset".to_string()),
+            Label::new("Top Right Offset"),
         )
         .add(
             PinOrigin::BottomLeft(Point::zero()),
-            Label::new("Bottom Left".to_string()),
+            Label::new("Bottom Left"),
         )
         .add(
             PinOrigin::BottomLeft(Point::new(10, 4)),
-            Label::new("Bottom Left Offset".to_string()),
+            Label::new("Bottom Left Offset"),
         )
         .add(
             PinOrigin::BottomRight(Point::zero()),
-            Label::new("Bottom Right".to_string()),
+            Label::new("Bottom Right"),
         )
         .add(
             PinOrigin::BottomRight(Point::new(10, 4)),
-            Label::new("Bottom Right Offset".to_string()),
+            Label::new("Bottom Right Offset"),
         )
-        .add(PinOrigin::Center, Label::new("Center".to_string()));
+        .add(PinOrigin::Center, Label::new("Center"));
 
     let mut buffer = terminal.prepare_buffer();
     layout.render(

@@ -18,12 +18,12 @@ fn main() {
         ContainerSizing::Fill,
     )
     .add(
-        MultilineText::new(ONE.to_string())
+        MultilineText::new(ONE)
             .width(ContainerSizing::Fixed(3))
             .height(ContainerSizing::Fixed(3)),
     )
     .add(
-        MultilineText::new(TWO.to_string())
+        MultilineText::new(TWO)
             .width(ContainerSizing::Fixed(3))
             .height(ContainerSizing::Fixed(3)),
     );

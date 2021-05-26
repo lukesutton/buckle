@@ -264,3 +264,43 @@ impl View for Padding {
         self.item.render(&offset, buffer);
     }
 }
+
+/// A view where all the rendering is handled by the provided function.
+pub struct Draw {
+    width: Sizing,
+    height: Sizing,
+    renderer: Box<dyn Fn(&Rect, &mut Buffer)>,
+}
+
+impl Draw {
+    pub fn new<R: 'static + Fn(&Rect, &mut Buffer)>(
+        width: Sizing,
+        height: Sizing,
+        renderer: R,
+    ) -> Self {
+        Self {
+            width,
+            height,
+            renderer: Box::new(renderer),
+        }
+    }
+}
+
+impl View for Draw {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        Constraints::new(
+            match self.width {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed(n.clamp(0, bounds.width)),
+            },
+            match self.height {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed(n.clamp(0, bounds.height)),
+            },
+        )
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        (self.renderer)(within, buffer);
+    }
+}

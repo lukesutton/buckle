@@ -99,6 +99,13 @@ impl Auto {
         self
     }
 
+    pub fn maybe_add<V: 'static + View>(mut self, check: bool, item: V) -> Self {
+        if check {
+            self.items.push(Box::new(item));
+        }
+        self
+    }
+
     pub fn rule(mut self, style: Option<Style>) -> Self {
         match self.dir {
             Dir::Horizontal => self.items.push(Box::new(VRule::new(style))),

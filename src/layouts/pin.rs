@@ -36,6 +36,13 @@ impl PinBoard {
         self.pins.push(Pin::new(origin, item));
         self
     }
+
+    pub fn maybe_add<V: 'static + View>(mut self, check: bool, origin: PinOrigin, item: V) -> Self {
+        if check {
+            self.pins.push(Pin::new(origin, item));
+        }
+        self
+    }
 }
 
 impl View for PinBoard {

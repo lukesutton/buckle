@@ -1,6 +1,6 @@
 use crate::buffer::Buffer;
 use crate::styles::Style;
-use crate::values::{Constraints, ContainerSizing, Dimensions, Rect, Sizing};
+use crate::values::{Constraints, ContainerSizing, Dimensions, Point, Rect, Sizing};
 
 pub trait View {
     fn sizing(&self, bounds: &Dimensions) -> Constraints;
@@ -173,5 +173,94 @@ impl View for HRule {
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
         buffer.draw_h_rule(&within.origin, within.dimensions.width, &self.style)
+    }
+}
+
+pub struct Padding {
+    top: usize,
+    bottom: usize,
+    left: usize,
+    right: usize,
+    item: Box<dyn View>,
+}
+
+impl Padding {
+    pub fn new<V: 'static + View>(
+        left: usize,
+        right: usize,
+        top: usize,
+        bottom: usize,
+        item: V,
+    ) -> Self {
+        Self {
+            top,
+            bottom,
+            left,
+            right,
+            item: Box::new(item),
+        }
+    }
+
+    pub fn vertical<V: 'static + View>(value: usize, item: V) -> Self {
+        Self {
+            top: value,
+            bottom: value,
+            left: 0,
+            right: 0,
+            item: Box::new(item),
+        }
+    }
+
+    pub fn horizontal<V: 'static + View>(value: usize, item: V) -> Self {
+        Self {
+            top: 0,
+            bottom: 0,
+            left: value,
+            right: value,
+            item: Box::new(item),
+        }
+    }
+
+    pub fn both<V: 'static + View>(h: usize, v: usize, item: V) -> Self {
+        Self {
+            top: v,
+            bottom: v,
+            left: h,
+            right: h,
+            item: Box::new(item),
+        }
+    }
+}
+
+impl View for Padding {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        let remaining = Dimensions::new(
+            bounds.width - self.left - self.right,
+            bounds.height - self.top - self.bottom,
+        );
+        let constraints = self.item.sizing(&remaining);
+        Constraints::new(
+            match constraints.width {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed(n + self.left + self.right),
+            },
+            match constraints.height {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed(n + self.top + self.bottom),
+            },
+        )
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        // Offset the rect and reduce it's size
+        let offset = Rect::new(
+            Point::new(within.origin.x + self.left, within.origin.y + self.top),
+            Dimensions::new(
+                within.dimensions.width - self.left - self.right,
+                within.dimensions.height - self.top - self.bottom,
+            ),
+        );
+
+        self.item.render(&offset, buffer);
     }
 }

@@ -6,6 +6,14 @@ use crate::views::{HRule, Spacer, VRule, View};
 
 /// A layout which positions it's children automatically based on their size
 /// and the constraints provided.
+
+/*
+Invariants that should hold:
+
+- Child elements that fall entirely within the layouts bounds will be entirely rendered
+- Elements that start within the layout, but end without, will be truncated
+- Elements which start outside of the layout, will be clipped
+*/
 pub struct Auto {
     dir: Dir,
     layout: Layout,
@@ -137,17 +145,13 @@ impl View for Auto {
                 for item in &self.items {
                     let constraints = item.sizing(&bounds);
 
-                    match constraints.width {
-                        Sizing::Fill => width = bounds.width,
-                        Sizing::Fixed(n) => width = (width + n).clamp(0, bounds.width),
+                    if let Sizing::Fixed(n) = constraints.width {
+                        width = (width + n).clamp(0, bounds.width)
                     }
 
-                    match constraints.height {
-                        Sizing::Fill => height = bounds.height,
-                        Sizing::Fixed(n) => {
-                            if n > height {
-                                height = n.clamp(0, bounds.height)
-                            }
+                    if let Sizing::Fixed(n) = constraints.height {
+                        if n > height {
+                            height = n.clamp(0, bounds.height)
                         }
                     }
                 }
@@ -156,17 +160,13 @@ impl View for Auto {
                 for item in &self.items {
                     let constraints = item.sizing(&bounds);
 
-                    match constraints.height {
-                        Sizing::Fill => height = bounds.height,
-                        Sizing::Fixed(n) => height = (height + n).clamp(0, bounds.height),
+                    if let Sizing::Fixed(n) = constraints.height {
+                        height = (height + n).clamp(0, bounds.height);
                     }
 
-                    match constraints.width {
-                        Sizing::Fill => width = bounds.width,
-                        Sizing::Fixed(n) => {
-                            if n > width {
-                                width = n.clamp(0, bounds.width)
-                            }
+                    if let Sizing::Fixed(n) = constraints.width {
+                        if n > width {
+                            width = n.clamp(0, bounds.width)
                         }
                     }
                 }
@@ -199,7 +199,11 @@ impl View for Auto {
             .collect();
         let layout = solve(&items, &self.dir, &self.layout, &within);
         for (rect, item) in layout.iter().zip(&self.items) {
-            item.render(&rect, buffer);
+            if rect.origin.x < within.origin.x + within.dimensions.width
+                && rect.origin.y < within.origin.y + within.dimensions.height
+            {
+                item.render(&rect, buffer);
+            }
         }
 
         if let Some(borders) = &self.border_style {

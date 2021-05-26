@@ -45,7 +45,7 @@ widget, which is to truncate the text, not wrap it.";
         .add(
             Auto::vertical()
                 .fill(FillStyle::new(None, Style::new().background(Color::Red)))
-                .height(ContainerSizing::Hug)
+                .height(ContainerSizing::Fixed(4))
                 .add(Label::new("Before".to_string()))
                 .rule(None)
                 .add(Label::new("After".to_string()))

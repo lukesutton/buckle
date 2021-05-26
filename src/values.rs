@@ -76,6 +76,7 @@ pub enum Sizing {
     Fixed(usize),
 }
 
+#[derive(Debug)]
 pub enum ContainerSizing {
     Hug,
     Fill,

@@ -33,8 +33,12 @@ pub fn solve(
         // Determine width
         match constraints.width {
             Sizing::Fixed(amt) => {
-                result.dimensions.width = amt.clamp(0, remaining_bounds.dimensions.width);
-                remaining_bounds.dimensions.width -= result.dimensions.width;
+                result.dimensions.width = amt.clamp(0, bounds.dimensions.width);
+                remaining_bounds.dimensions.width = remaining_bounds
+                    .dimensions
+                    .width
+                    .checked_sub(result.dimensions.width)
+                    .unwrap_or(0);
             }
             Sizing::Fill => fills.push(i),
         }
@@ -42,7 +46,7 @@ pub fn solve(
         // Determine height
         result.dimensions.height = match constraints.height {
             Sizing::Fill => remaining_bounds.dimensions.height,
-            Sizing::Fixed(amt) => amt.clamp(0, remaining_bounds.dimensions.height),
+            Sizing::Fixed(amt) => amt.clamp(0, bounds.dimensions.height),
         };
 
         results.push(result);
@@ -98,7 +102,7 @@ pub fn solve(
     // Remove the spacer elements
     spacing.cleanup(&mut results);
 
-    // Finally, rotate all the elements if needed
+    // Rotate all the elements if needed
     if rotate {
         for result in results.iter_mut() {
             result.rotate();

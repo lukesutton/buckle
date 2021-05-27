@@ -76,6 +76,15 @@ pub enum Sizing {
     Fixed(usize),
 }
 
+impl Sizing {
+    pub fn constrain_by(&self, max: usize) -> Self {
+        match self {
+            Sizing::Fill => Sizing::Fill,
+            Sizing::Fixed(n) => Sizing::Fixed(*n.clamp(&0, &max)),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum ContainerSizing {
     Hug,

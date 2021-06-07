@@ -1,6 +1,7 @@
 use crate::buffer::Buffer;
-use crate::styles::Style;
+use crate::styles::{BorderStyle, Style};
 use crate::values::{Constraints, ContainerSizing, Dimensions, Point, Rect, Sizing};
+use crossterm::style::Color;
 
 pub trait View {
     fn sizing(&self, bounds: &Dimensions) -> Constraints;
@@ -201,6 +202,16 @@ impl Padding {
         }
     }
 
+    pub fn all<V: 'static + View>(value: usize, item: V) -> Self {
+        Self {
+            top: value,
+            bottom: value,
+            left: value,
+            right: value,
+            item: Box::new(item),
+        }
+    }
+
     pub fn vertical<V: 'static + View>(value: usize, item: V) -> Self {
         Self {
             top: value,
@@ -262,6 +273,122 @@ impl View for Padding {
         );
 
         self.item.render(&offset, buffer);
+    }
+}
+
+pub struct BackgroundFill {
+    display: char,
+    item: Box<dyn View>,
+}
+
+impl BackgroundFill {
+    pub fn new<V: 'static + View>(display: char, item: V) -> Self {
+        Self {
+            display,
+            item: Box::new(item),
+        }
+    }
+}
+
+impl View for BackgroundFill {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        self.item.sizing(&bounds)
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        // buffer.merge_style(within, &Style::new().background(self.color));
+
+        self.item.render(within, buffer)
+    }
+}
+
+pub struct BackgroundColor {
+    color: Color,
+    item: Box<dyn View>,
+}
+
+impl BackgroundColor {
+    pub fn new<V: 'static + View>(color: Color, item: V) -> Self {
+        Self {
+            color,
+            item: Box::new(item),
+        }
+    }
+}
+
+impl View for BackgroundColor {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        self.item.sizing(&bounds)
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        buffer.merge_style(within, &Style::new().background(self.color));
+        self.item.render(within, buffer)
+    }
+}
+
+pub struct ForegroundColor {
+    color: Color,
+    item: Box<dyn View>,
+}
+
+impl ForegroundColor {
+    pub fn new<V: 'static + View>(color: Color, item: V) -> Self {
+        Self {
+            color,
+            item: Box::new(item),
+        }
+    }
+}
+
+impl View for ForegroundColor {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        self.item.sizing(&bounds)
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        buffer.merge_style(within, &Style::new().foreground(self.color));
+        self.item.render(within, buffer)
+    }
+}
+
+pub struct Border {
+    style: BorderStyle,
+    item: Box<dyn View>,
+}
+
+impl Border {
+    pub fn new<V: 'static + View>(style: BorderStyle, item: V) -> Self {
+        Self {
+            style,
+            item: Box::new(item),
+        }
+    }
+}
+
+impl View for Border {
+    fn sizing(&self, bounds: &Dimensions) -> Constraints {
+        let sizing = self.item.sizing(&bounds);
+        Constraints::new(
+            match sizing.width {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed((n + 2).clamp(0, bounds.width)),
+            },
+            match sizing.height {
+                Sizing::Fill => Sizing::Fill,
+                Sizing::Fixed(n) => Sizing::Fixed((n + 2).clamp(0, bounds.height)),
+            },
+        )
+    }
+
+    fn render(&self, within: &Rect, buffer: &mut Buffer) {
+        let mut within = within.clone();
+        buffer.draw_box(&within, false, &None);
+        within.origin.x += 1;
+        within.origin.y += 1;
+        within.dimensions.width -= 2;
+        within.dimensions.height -= 2;
+        self.item.render(&within, buffer);
     }
 }
 

@@ -12,6 +12,14 @@ impl FillStyle {
     }
 }
 
+pub enum BorderStyle {
+    Solid,
+    SolidRounded,
+    Dashed,
+    Dotted,
+    Double,
+}
+
 pub struct LineStyle {
     pub corners: Corners,
     pub stroke: Stroke,
@@ -62,15 +70,19 @@ impl Style {
         }
     }
 
-    /// Merges in style values from another, but preserves the background
-    /// color, except in the case where the other defines one.
+    /// Merges the other style into this one, preserving attributes and only
+    // adding or updating them.
     pub fn update(&mut self, other: &Style) {
-        match (self.style.background_color, other.style.background_color) {
-            (Some(color), None) => {
-                self.style = other.style.clone();
-                self.style.background(color);
-            }
-            _ => self.style = other.style.clone(),
+        if let Some(color) = other.style.background_color {
+            self.style.background(color);
+        }
+
+        if let Some(color) = other.style.foreground_color {
+            self.style.foreground(color);
+        }
+
+        if !other.style.attributes.is_empty() {
+            self.style.attributes.extend(other.style.attributes)
         }
     }
 

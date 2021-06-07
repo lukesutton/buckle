@@ -165,6 +165,19 @@ impl Buffer {
         }
     }
 
+    pub fn merge_style(&mut self, within: &Rect, style: &Style) {
+        for row in within.origin.y..(within.origin.y + within.dimensions.height) {
+            for col in within.origin.x..(within.origin.x + within.dimensions.width) {
+                let mut cell = self.mut_cell(col, row);
+                if let Some(existing) = &mut cell.style {
+                    existing.update(style)
+                } else {
+                    cell.style = Some(style.clone())
+                }
+            }
+        }
+    }
+
     pub fn draw_fill(&mut self, within: &Rect, style: Style, char: Option<char>) {
         let char = char.unwrap_or(' ');
         for row in within.origin.y..(within.origin.y + within.dimensions.height) {

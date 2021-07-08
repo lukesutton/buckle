@@ -24,29 +24,25 @@ fn layout() -> PinBoard {
                 Auto::vertical()
                     // .layout(Layout::fixed(Align::Start, Align::Start, 1))
                     .width(ContainerSizing::Fixed(22))
-                    .add(BackgroundColor::new(
-                        Color::Green,
-                        ForegroundColor::new(
-                            Color::Black,
-                            Padding::all(
-                                1,
-                                Auto::vertical()
-                                    .height(ContainerSizing::Hug)
-                                    .add(Label::new(" ◀ ▶ PATTERNS").width(ContainerSizing::Fill))
-                                    .add(
-                                        Label::new(" ▲ ▼ INDEX: 001").width(ContainerSizing::Fill),
-                                    ),
-                            ),
-                        ),
-                    ))
+                    .add(
+                        Styled::new(Padding::all(
+                            1,
+                            Auto::vertical()
+                                .height(ContainerSizing::Hug)
+                                .add(Label::new(" ◀ ▶ PATTERNS").width(ContainerSizing::Fill))
+                                .add(Label::new(" ▲ ▼ INDEX: 001").width(ContainerSizing::Fill)),
+                        ))
+                        .background(Color::Green)
+                        .foreground(Color::Black),
+                    )
                     .add(Padding::horizontal(1, BigNumbers::new(&144.10)))
                     .add(Label::new(" POS: 00:00:00"))
                     .add(Label::new(" SEQ: 00:00:00"))
                     .add(Label::new(" STP: 00:00:00")),
             )
-            .add(
+            .add(Border::new(
+                Stroke::Solid,
                 Auto::vertical()
-                    .borders(LineStyle::new(Corners::Regular, Stroke::Solid, None))
                     .add(
                         Auto::horizontal()
                             .height(ContainerSizing::Hug)
@@ -55,10 +51,10 @@ fn layout() -> PinBoard {
                             .add(Label::new("COM"))
                             .add(Label::new("TAR"))
                             .add(Label::new("FRQ"))
-                            .rule(None)
+                            .add(Rule::new(Dir::Horizontal))
                             .add_each(1..=16, |i| Label::new(&format!("{:->3}", i))),
                     )
-                    .split()
+                    .add(Rule::new(Dir::Horizontal))
                     .add_each(1..=8, |i| {
                         Auto::horizontal()
                             .height(ContainerSizing::Hug)
@@ -67,10 +63,10 @@ fn layout() -> PinBoard {
                             .add(Label::new("···"))
                             .add(Label::new("···"))
                             .add(Label::new("···"))
-                            .rule(None)
+                            .add(Rule::new(Dir::Vertical))
                             .add_each(1..=16, |i| Label::new("···"))
                     }),
-            ),
+            )),
     )
 }
 

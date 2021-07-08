@@ -1,13 +1,10 @@
 use crate::buffer::Buffer;
-use crate::styles::{FillStyle, LineStyle};
 use crate::values::{Constraints, Dimensions, Point, Rect, Sizing};
 use crate::views::View;
 
 pub struct PinBoard {
     width: Sizing,
     height: Sizing,
-    border_style: Option<LineStyle>,
-    fill_style: Option<FillStyle>,
     pins: Vec<Pin>,
 }
 
@@ -16,28 +13,16 @@ impl PinBoard {
         Self {
             width,
             height,
-            border_style: None,
-            fill_style: None,
             pins: Vec::new(),
         }
     }
 
-    pub fn borders(mut self, borders: LineStyle) -> Self {
-        self.border_style = Some(borders);
-        self
-    }
-
-    pub fn fill(mut self, fill: FillStyle) -> Self {
-        self.fill_style = Some(fill);
-        self
-    }
-
-    pub fn add<V: 'static + View>(mut self, origin: PinOrigin, item: V) -> Self {
+    pub fn add<V: View>(mut self, origin: PinOrigin, item: V) -> Self {
         self.pins.push(Pin::new(origin, item));
         self
     }
 
-    pub fn maybe_add<V: 'static + View>(mut self, check: bool, origin: PinOrigin, item: V) -> Self {
+    pub fn maybe_add<V: View>(mut self, check: bool, origin: PinOrigin, item: V) -> Self {
         if check {
             self.pins.push(Pin::new(origin, item));
         }
@@ -54,19 +39,6 @@ impl View for PinBoard {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        let mut within = within.clone();
-        if let Some(borders) = &self.border_style {
-            buffer.draw_box(&within, false, &borders.style);
-            within.origin.x += 1;
-            within.origin.y += 1;
-            within.dimensions.width -= 2;
-            within.dimensions.height -= 2;
-        }
-
-        if let Some(fill) = &self.fill_style {
-            buffer.draw_fill(&within, fill.style, fill.repeating);
-        }
-
         for pin in &self.pins {
             match &pin.origin {
                 PinOrigin::TopLeft(point)
@@ -149,7 +121,7 @@ pub struct Pin {
 }
 
 impl Pin {
-    pub fn new<V: 'static + View>(origin: PinOrigin, item: V) -> Self {
+    pub fn new<V: View>(origin: PinOrigin, item: V) -> Self {
         Self {
             origin,
             item: Box::new(item),

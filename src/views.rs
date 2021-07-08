@@ -1,14 +1,20 @@
 use crate::buffer::Buffer;
-use crate::styles::{BorderStyle, Style};
-use crate::values::{Constraints, ContainerSizing, Dimensions, Point, Rect, Sizing};
+use crate::styles::{Stroke, Style};
+use crate::values::{Constraints, ContainerSizing, Dimensions, Dir, Point, Rect, Sizing};
 use crossterm::style::Color;
 
-pub trait View {
+pub trait View: 'static {
     fn sizing(&self, bounds: &Dimensions) -> Constraints;
     fn render(&self, within: &Rect, buffer: &mut Buffer);
 }
 
 pub struct Spacer;
+
+impl Spacer {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl View for Spacer {
     fn sizing(&self, _: &Dimensions) -> Constraints {
@@ -25,7 +31,6 @@ pub struct Label {
     pub text: String,
     pub width: ContainerSizing,
     pub height: ContainerSizing,
-    pub style: Option<Style>,
 }
 
 impl Label {
@@ -34,7 +39,6 @@ impl Label {
             text: text.to_string(),
             width: ContainerSizing::Hug,
             height: ContainerSizing::Hug,
-            style: None,
         }
     }
 
@@ -45,11 +49,6 @@ impl Label {
 
     pub fn height(mut self, height: ContainerSizing) -> Self {
         self.height = height;
-        self
-    }
-
-    pub fn style(mut self, style: Style) -> Self {
-        self.style = Some(style);
         self
     }
 }
@@ -68,9 +67,9 @@ impl View for Label {
         if self.text.chars().count() > within.dimensions.width {
             let mut prefix = self.text.clone();
             prefix.truncate(within.dimensions.width);
-            buffer.draw_text(&within.origin, &prefix, &self.style);
+            buffer.draw_text(&within.origin, &prefix);
         } else {
-            buffer.draw_text(&within.origin, &self.text, &self.style);
+            buffer.draw_text(&within.origin, &self.text);
         }
     }
 }
@@ -79,7 +78,6 @@ pub struct MultilineText {
     pub text: String,
     pub width: ContainerSizing,
     pub height: ContainerSizing,
-    pub style: Option<Style>,
 }
 
 impl MultilineText {
@@ -88,7 +86,6 @@ impl MultilineText {
             text: text.to_string(),
             width: ContainerSizing::Hug,
             height: ContainerSizing::Hug,
-            style: None,
         }
     }
 
@@ -99,11 +96,6 @@ impl MultilineText {
 
     pub fn height(mut self, height: ContainerSizing) -> Self {
         self.height = height;
-        self
-    }
-
-    pub fn style(mut self, style: Style) -> Self {
-        self.style = Some(style);
         self
     }
 }
@@ -126,54 +118,39 @@ impl View for MultilineText {
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        buffer.draw_multiline_text(&within, &self.text, &self.style);
+        buffer.draw_multiline_text(&within, &self.text);
     }
 }
 
-// // A vertical line that occupies the full height of it's container.
-pub struct VRule {
-    pub style: Option<Style>,
+pub struct Rule {
+    dir: Dir,
 }
 
-impl VRule {
-    pub fn new(style: Option<Style>) -> Self {
-        Self { style }
+impl Rule {
+    pub fn new(dir: Dir) -> Self {
+        Self { dir }
     }
 }
 
-impl View for VRule {
+impl View for Rule {
     fn sizing(&self, _: &Dimensions) -> Constraints {
-        Constraints {
-            height: Sizing::Fill,
-            width: Sizing::Fixed(1),
+        match self.dir {
+            Dir::Horizontal => Constraints {
+                height: Sizing::Fixed(1),
+                width: Sizing::Fill,
+            },
+            Dir::Vertical => Constraints {
+                height: Sizing::Fill,
+                width: Sizing::Fixed(1),
+            },
         }
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        buffer.draw_v_rule(&within.origin, within.dimensions.height, &self.style)
-    }
-}
-
-pub struct HRule {
-    pub style: Option<Style>,
-}
-
-impl HRule {
-    pub fn new(style: Option<Style>) -> Self {
-        Self { style }
-    }
-}
-
-impl View for HRule {
-    fn sizing(&self, _: &Dimensions) -> Constraints {
-        Constraints {
-            height: Sizing::Fixed(1),
-            width: Sizing::Fill,
+        match self.dir {
+            Dir::Horizontal => buffer.draw_h_rule(&within.origin, within.dimensions.width),
+            Dir::Vertical => buffer.draw_v_rule(&within.origin, within.dimensions.height),
         }
-    }
-
-    fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        buffer.draw_h_rule(&within.origin, within.dimensions.width, &self.style)
     }
 }
 
@@ -186,13 +163,7 @@ pub struct Padding {
 }
 
 impl Padding {
-    pub fn new<V: 'static + View>(
-        left: usize,
-        right: usize,
-        top: usize,
-        bottom: usize,
-        item: V,
-    ) -> Self {
+    pub fn new<V: View>(left: usize, right: usize, top: usize, bottom: usize, item: V) -> Self {
         Self {
             top,
             bottom,
@@ -202,7 +173,7 @@ impl Padding {
         }
     }
 
-    pub fn all<V: 'static + View>(value: usize, item: V) -> Self {
+    pub fn all<V: View>(value: usize, item: V) -> Self {
         Self {
             top: value,
             bottom: value,
@@ -212,7 +183,7 @@ impl Padding {
         }
     }
 
-    pub fn vertical<V: 'static + View>(value: usize, item: V) -> Self {
+    pub fn vertical<V: View>(value: usize, item: V) -> Self {
         Self {
             top: value,
             bottom: value,
@@ -222,7 +193,7 @@ impl Padding {
         }
     }
 
-    pub fn horizontal<V: 'static + View>(value: usize, item: V) -> Self {
+    pub fn horizontal<V: View>(value: usize, item: V) -> Self {
         Self {
             top: 0,
             bottom: 0,
@@ -232,7 +203,7 @@ impl Padding {
         }
     }
 
-    pub fn both<V: 'static + View>(h: usize, v: usize, item: V) -> Self {
+    pub fn both<V: View>(h: usize, v: usize, item: V) -> Self {
         Self {
             top: v,
             bottom: v,
@@ -276,93 +247,89 @@ impl View for Padding {
     }
 }
 
-pub struct BackgroundFill {
-    display: char,
+pub struct Styled {
+    style: Style,
     item: Box<dyn View>,
 }
 
-impl BackgroundFill {
-    pub fn new<V: 'static + View>(display: char, item: V) -> Self {
+impl Styled {
+    pub fn new<V: View>(item: V) -> Self {
         Self {
-            display,
+            style: Style::new(),
             item: Box::new(item),
         }
     }
+
+    pub fn background(mut self, color: Color) -> Self {
+        self.style = self.style.background(color);
+        self
+    }
+
+    pub fn foreground(mut self, color: Color) -> Self {
+        self.style = self.style.foreground(color);
+        self
+    }
+
+    pub fn bold(mut self) -> Self {
+        self.style = self.style.bold();
+        self
+    }
+
+    pub fn italic(mut self) -> Self {
+        self.style = self.style.italic();
+        self
+    }
+
+    pub fn underlined(mut self) -> Self {
+        self.style = self.style.underlined();
+        self
+    }
+
+    pub fn crossed_out(mut self) -> Self {
+        self.style = self.style.crossed_out();
+        self
+    }
+
+    pub fn reverse(mut self) -> Self {
+        self.style = self.style.reverse();
+        self
+    }
 }
 
-impl View for BackgroundFill {
+impl View for Styled {
     fn sizing(&self, bounds: &Dimensions) -> Constraints {
         self.item.sizing(&bounds)
     }
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        // buffer.merge_style(within, &Style::new().background(self.color));
-
-        self.item.render(within, buffer)
-    }
-}
-
-pub struct BackgroundColor {
-    color: Color,
-    item: Box<dyn View>,
-}
-
-impl BackgroundColor {
-    pub fn new<V: 'static + View>(color: Color, item: V) -> Self {
-        Self {
-            color,
-            item: Box::new(item),
-        }
-    }
-}
-
-impl View for BackgroundColor {
-    fn sizing(&self, bounds: &Dimensions) -> Constraints {
-        self.item.sizing(&bounds)
-    }
-
-    fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        buffer.merge_style(within, &Style::new().background(self.color));
-        self.item.render(within, buffer)
-    }
-}
-
-pub struct ForegroundColor {
-    color: Color,
-    item: Box<dyn View>,
-}
-
-impl ForegroundColor {
-    pub fn new<V: 'static + View>(color: Color, item: V) -> Self {
-        Self {
-            color,
-            item: Box::new(item),
-        }
-    }
-}
-
-impl View for ForegroundColor {
-    fn sizing(&self, bounds: &Dimensions) -> Constraints {
-        self.item.sizing(&bounds)
-    }
-
-    fn render(&self, within: &Rect, buffer: &mut Buffer) {
-        buffer.merge_style(within, &Style::new().foreground(self.color));
+        buffer.merge_style(within, &self.style);
         self.item.render(within, buffer)
     }
 }
 
 pub struct Border {
-    style: BorderStyle,
+    stroke: Stroke,
+    style: Style,
     item: Box<dyn View>,
 }
 
 impl Border {
-    pub fn new<V: 'static + View>(style: BorderStyle, item: V) -> Self {
+    pub fn new<V: View>(stroke: Stroke, item: V) -> Self {
         Self {
-            style,
+            stroke,
+            style: Style::new(),
             item: Box::new(item),
         }
+    }
+
+    pub fn foreground(mut self, color: Color) -> Self {
+        self.style = self.style.foreground(color);
+        self
+    }
+
+    pub fn background(mut self, color: Color) -> Self {
+        self.style = self.style.background(color);
+        self
     }
 }
 
@@ -383,7 +350,7 @@ impl View for Border {
 
     fn render(&self, within: &Rect, buffer: &mut Buffer) {
         let mut within = within.clone();
-        buffer.draw_box(&within, false, &None);
+        buffer.draw_box(&within, &self.stroke, &Some(self.style));
         within.origin.x += 1;
         within.origin.y += 1;
         within.dimensions.width -= 2;

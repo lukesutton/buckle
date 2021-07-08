@@ -12,11 +12,10 @@ fn main() {
         .add(Label::new("Eight"))
         .add(Label::new("Nine"))
         .add(Label::new("Ten"))
-        .add(
-            Auto::vertical()
-                .borders(LineStyle::new(Corners::Regular, Stroke::Solid, None))
-                .height(ContainerSizing::Fixed(300)),
-        );
+        .add(Border::new(
+            Stroke::Solid,
+            Auto::vertical().height(ContainerSizing::Fixed(300)),
+        ));
 
     let mut terminal = Terminal::new();
     let mut buffer = terminal.prepare_buffer();

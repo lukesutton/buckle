@@ -34,7 +34,7 @@ impl ScrollBox {
         }
     }
 
-    pub fn add<V: 'static + View>(mut self, item: V) -> Self {
+    pub fn add<V: View>(mut self, item: V) -> Self {
         self.contents = self.contents.add(item);
         self
     }
